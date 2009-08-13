@@ -1,5 +1,35 @@
 module JCore
   #
+  # Stores tokens array separately
+  #
+  class TokenBuffer < Array
+    
+    attr_reader :tokens
+    attr_reader :capacity
+    
+    def initialize(capacity = -1)
+      @tokens = Array.new
+      @capacity = capacity
+      super(0)
+    end
+    
+    def push(item)
+      shift if size == capacity
+      @tokens.push(item.token)
+      super(item)
+    end
+    
+    def shift
+      @tokens.shift
+      super()
+    end
+    
+    def full?
+      size == capacity
+    end
+    
+  end
+  #
   # JCore::Token objects are returned by the JCore::Tokenizer
   #
   class Token < String
@@ -7,6 +37,7 @@ module JCore
     attr_reader :token
     attr_reader :label
     attr_reader :tag_type
+    attr_accessor :meta_id
 
     def initialize( token, text = "" )
       super(text)
@@ -52,6 +83,12 @@ module JCore
     #
     def inspect
       "#{token}#{ ": #{self}" unless self.empty? }"
+    end
+    #
+    #
+    #
+    def to_s
+      is_token? ? token.to_s : super
     end
     
     protected

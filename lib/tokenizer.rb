@@ -1,13 +1,13 @@
 require 'strscan'
 
-module JCore
+module JCore  
   #
   # Rails HTML::Tokenizer Code with some modifications
   # You can fetch the current state of the tokenizer and 
   # And also reset the tokenizer to a particular state or default state.
   # It returns tokens rather than text.
   #
-  class Tokenizer #:nodoc:
+  class BaseTokenizer #:nodoc:
     
     # The current (byte) position in the text
     attr_reader :position
@@ -107,5 +107,55 @@ module JCore
         text
       end
   end
+  
+  #
+  #  Default Tokenizer skips script, objects
+  #
+  #
+  class Tokenizer <  BaseTokenizer
+    
+    Exceptions = { :'<script>' => :'</script>', :'<object>' => :'</object>', :'<style>' => :'</style>', 
+      :'<!---->' => true, :'<script/>' => true, :'<style/>' => true, :'<object/>' => true }
+    
+    def next
+      token = super
+      if token && Exceptions.has_key?( token.token )
+        return self.next() if Exceptions[token.token] == true
+        otoken = token
+        while ( token = super )
+          return self.next if Exceptions[ otoken.token ] == token.token
+        end
+      end
+      return token
+    end
+    
+  end
+  
+  # #
+  # #
+  # #
+  # class Tokenizer < BaseTokenizer
+  #   
+  #   
+  #   
+  #   def next
+  #     while ( token = super )
+  #       return ( @current_token = token ) if Exceptions[ @current_token.token ] == token.token
+  #     end if Exceptions.has_key?( @current_token ? @current_token.token : nil )
+  #     @current_token = super
+  #     @current_token && Exceptions[@current_token.token] == true ? next : @current_token
+  #   end
+  #   
+  #   def current_state
+  #     super.merge( :current_token => @current_token )
+  #   end
+  #   
+  #   def reset(state=nil)
+  #     super(state)
+  #     state ||= { :current_token => nil }
+  #     @current_node = state[:current_token ]
+  #   end
+  #   
+  # end
 
 end

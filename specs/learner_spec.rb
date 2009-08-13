@@ -4,7 +4,7 @@ describe JCore::Learner do
   
   describe 'with zero fields to extract' do
      before do
-       @document = File.open(File.dirname(__FILE__) + '/sample_story.html').read
+       @document = File.open(File.dirname(__FILE__) + '/data/labeled/story_001.html').read
        @template = JCore::Template.new([], :ft, 3)
      end
 
@@ -17,7 +17,7 @@ describe JCore::Learner do
   
   describe 'with one field to extract' do
     before do
-      @document = File.open(File.dirname(__FILE__) + '/sample_story.html').read
+      @document = File.open(File.dirname(__FILE__) + '/data/labeled/story_001.html').read
       @template = JCore::Template.new([:author], :ft, 3)
     end
   
@@ -34,7 +34,7 @@ describe JCore::Learner do
   
   describe 'with two fields to extract' do
     before do
-      @document = File.open(File.dirname(__FILE__) + '/sample_story.html').read
+      @document = File.open(File.dirname(__FILE__) + '/data/labeled/story_001.html').read
       @template = JCore::Template.new([:author, :summary], :ft, 3)
     end
   
@@ -50,7 +50,7 @@ describe JCore::Learner do
     
     it 'should learn the prefix pattern for summary correctly' do
       @template = JCore::Learner.learn(@document, @template)
-      @template[:summary].prefix.should  be_include( [:'</script>', :'<div>', :'<p>'] )
+      @template[:summary].prefix.should  be_include( [:'<div>', :'<div>', :'<p>'] )
     end
   
     it 'should learn the suffix pattern for summary correctly' do
@@ -62,7 +62,7 @@ describe JCore::Learner do
   
   describe 'with a field having multiple labels to extract' do
     before do
-      @document = File.open(File.dirname(__FILE__) + '/sample_story.html').read
+      @document = File.open(File.dirname(__FILE__) + '/data/labeled/story_001.html').read
       @template = JCore::Template.new([:author, :summary, :text], :ft, 3)
     end
   
@@ -78,7 +78,7 @@ describe JCore::Learner do
     
     it 'should learn the prefix pattern for summary correctly' do
       @template = JCore::Learner.learn(@document, @template)
-      @template[:summary].prefix.should  be_include( [:'</script>', :'<div>', :'<p>'] )
+      @template[:summary].prefix.should  be_include( [:'<div>', :'<div>', :'<p>'] )
     end
   
     it 'should learn the suffix pattern for summary correctly' do

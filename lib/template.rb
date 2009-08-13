@@ -1,5 +1,19 @@
 module JCore
   
+  class Match
+    attr_reader :score
+    attr_accessor :index
+    
+    def initialize(score)
+      @score = score
+    end
+    
+    def <=>(other)
+      score <=> other.score
+    end
+    
+  end
+  
   #
   # Pattern for the template field are the sequence of prefix tags and suffix tags which 
   # in some way define the structure of the html template page through which data is being
@@ -21,6 +35,43 @@ module JCore
     def initialize
       @suffix = Array.new
       @prefix = Array.new
+    end
+    
+    #
+    # Suffix Match are Fuzzy ( From list of possible matches best one is choose )
+    #
+    def self.suffix_match(seq1, seq2)
+      score = edit_distance(seq1, seq2)
+      score <= optimal_distance(seq1, seq2) ? JCore::Match.new(score) : nil
+    end
+    #
+    # Prefix Match are Exact
+    #
+    def self.prefix_match(seq1, seq2)
+      seq1 == seq2 ? JCore::Match.new(1) : nil
+    end
+    
+    protected
+    #
+    # Levhenstein Edit Distance
+    # Source: http://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance
+    #
+    def self.edit_distance(seq1, seq2)
+      matrix = Array.new(seq1.size+1).collect!{ Array.new(seq2.size+1, 0) }
+      seq1.size.times{ |i| matrix[i+1][0] = i+1 }
+      seq2.size.times{ |j| matrix[0][j+1] = j+1 }
+      seq1.size.times do |i|
+        seq2.size.times do |j|
+          matrix[i+1][j+1] = [ matrix[i][j+1]+1, matrix[i+1][j]+1, matrix[i][j] + (seq1[i] == seq2[j] ? 0 : 1) ].min
+        end
+      end
+      matrix[seq1.size][seq2.size]
+    end
+    #
+    # Something that may be tweaked.
+    #
+    def self.optimal_distance(seq1, seq2)
+      [seq1.size, seq2.size].min / 10
     end
     
   end
@@ -45,7 +96,20 @@ module JCore
       end
       @max_length = max_length
     end
-    
+    #
+    #
+    #
+    def prefix_match(buf)
+      each_pair do | field, pattern |
+        pattern.prefix.each_with_index do | prefix_pattern, index |
+          return field, pattern.suffix[index] if Pattern.prefix_match( prefix_pattern, buf )
+        end
+      end
+      return nil, nil
+    end
+    #
+    #
+    #
     def inspect
       "<Template:#{object_id} @source:#{source} @fields:[ #{fields.join(', ')} ]>"
     end
