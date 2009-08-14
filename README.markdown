@@ -15,51 +15,50 @@ Requirements
 
 Specs
 -----
-<pre><code>
-rake specs:all
-</code></pre>
+<pre><code>rake specs:all</code>
+</pre>
 
 Scripts
 -------
-
-Sources Learned: NY Times, Times
-NOTE: Following commands are to be run from jCore ROOT\_DIRECTORY.
+<p>Sources Learned: NY Times, Times
+NOTE: Following commands are to be run from jCore ROOT_DIR.
+</p>
 
 ### How to learn?
+<pre><code>ruby script/learn -s times
+ruby script/learn -s nytimes</code>
+</pre>
 
-<pre><code>
-ruby script/learn -s times
-ruby script/learn -s nytimes
-</code></pre>
-
-This will learn about Times and NY Times pages respectively.
-The labeled data is stored in <code>LIB\_ROOT/data/labeled_stories</code>.
-The file naming follows following convention: <code>&lt;source&gt;\_ddd.kd+.html</code> where
+<p>This will learn about Times and NY Times pages respectively.
+The labeled data is stored in <code>ROOT_DIR/data/labeled_stories</code>.
+The file naming follows following convention: <code>&lt;source&gt;_ddd.kd+.html</code> where
 <code>d</code> represents digit and <code>d+</code> represents one or more digits. E.g.
+</p>
 
-<code>nytimes\_001.k5.html</code> tells that source is <code>nytimes</code> and maximum
+<p><code>nytimes_001.k5.html</code> tells that source is <code>nytimes</code> and maximum
 prefix/suffix length for the template is <code>5</code>.
+</p>
 
-To add more sources, the labeled data should be created and then learn script be run.
+<p>To add more sources, the labeled data should be created and then learn script be run.
+</p>
 
 ### How to inspect the template learned?
-
-<pre><code>
-ruby script/template -s times
+<pre><code>ruby script/template -s times
 ruby script/template -s nytimes
-</code></pre>
+</code>
+</pre>
 
-This will show the template structure.
+<p>This will show the template structure.</p>
 
 ### How to extract information?
-
-<pre><code>
-ruby script/extract -s times -u "http://www.time.com/time/nation/article/0,8599,1915835,00.html"
+<pre><code>ruby script/extract -s times -u "http://www.time.com/time/nation/article/0,8599,1915835,00.html"
 ruby script/extract -s nytimes -u "http://www.nytimes.com/2009/08/14/opinion/14krugman.html"
-</code></pre>
+</code>
+</pre>
 
-This will display the information that is extracted using templates.
+<p>This will display the information that is extracted using templates.
 If information is not extracted then it reports "Information not found".
+</p>
 
 Author
 ------
@@ -68,4 +67,3 @@ Ram Singla
 Copyright
 ---------
 Jurnalo.com (c) 2009
-
