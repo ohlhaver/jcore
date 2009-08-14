@@ -20,8 +20,8 @@ Specs
 
 Scripts
 -------
-<p>Sources Learned: NY Times, Times
-NOTE: Following commands are to be run from jCore ROOT_DIR.
+<p>Sources Learned: NY Times, Times</p>
+<p>NOTE: Following commands are to be run from jCore ROOT_DIR.
 </p>
 
 ### How to learn?
@@ -44,16 +44,14 @@ prefix/suffix length for the template is <code>5</code>.
 
 ### How to inspect the template learned?
 <pre><code>ruby script/template -s times
-ruby script/template -s nytimes
-</code>
+ruby script/template -s nytimes</code>
 </pre>
 
 <p>This will show the template structure.</p>
 
 ### How to extract information?
 <pre><code>ruby script/extract -s times -u "http://www.time.com/time/nation/article/0,8599,1915835,00.html"
-ruby script/extract -s nytimes -u "http://www.nytimes.com/2009/08/14/opinion/14krugman.html"
-</code>
+ruby script/extract -s nytimes -u "http://www.nytimes.com/2009/08/14/opinion/14krugman.html"</code>
 </pre>
 
 <p>This will display the information that is extracted using templates.
