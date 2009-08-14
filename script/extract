@@ -1,0 +1,47 @@
+#!/usr/bin/env ruby
+require File.join(File.dirname(__FILE__), '../jcore')
+require 'pp'
+require 'optparse'
+require 'open-uri'
+
+options = {}
+
+OptionParser.new do |opts|
+  opts.banner = "Usage:\n    ruby #{$0} -s source -u url1,url2,url3.."
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    options[:verbose] = v
+  end
+  opts.on("-u", "--url x", String, "List of urls to crawl [Required]") do |list|
+    options[:urls] = [ list ]
+  end
+  opts.on("-s", "--source s", String, "Source name [Required]") do |s|
+    options[:source] = s
+  end
+  opts.on("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+end.parse!
+STDERR<<"Required option -s not specified\n"  && exit if options[:source].nil? || options[:source].empty?
+STDERR<<"Required option -u not specified\n"  && exit if options[:urls].nil? || options[:urls].empty?
+
+LearnedTemplatesHome = File.expand_path( File.join( File.dirname(__FILE__), "../data/learned_templates" ) ).freeze
+input_file = Dir[ "#{LearnedTemplatesHome}/#{options[:source]}.jseq" ].first
+STDERR<<"Template Error: Do not know about the source - #{options[:source]}\n" && exit if input_file.nil?
+
+templates = JCore::Template.load(input_file)
+options[:urls].each_with_index do |url, index|
+  puts "#{index+1}. ".rjust(3) << url
+  doc = open( url ).read
+  information = JCore::Extracter.extract( doc, templates )
+  puts "Headline"
+  puts "--------"
+  puts information[:headline] || "Information not found"
+  puts "\nAuthor"
+  puts "------"
+  puts information[:author] || "Information not found"
+  puts "\nStory"
+  puts "-----"
+  puts information[:story] || "Information not found"
+  puts "-"*80
+end

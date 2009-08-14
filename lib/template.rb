@@ -1,6 +1,9 @@
 module JCore
   
+  # Lower the score better is the match
+  # 0 == Exact Match
   class Match
+    
     attr_reader :score
     attr_accessor :index
     
@@ -40,15 +43,15 @@ module JCore
     #
     # Suffix Match are Fuzzy ( From list of possible matches best one is choose )
     #
-    def self.suffix_match(seq1, seq2)
+    def self.suffix_match(seq1, seq2, max_length=20)
       score = edit_distance(seq1, seq2)
-      score <= optimal_distance(seq1, seq2) ? JCore::Match.new(score) : nil
+      score <= optimal_distance(seq1, seq2, max_length) && seq1.first == seq2.first ? JCore::Match.new(score) : nil
     end
     #
     # Prefix Match are Exact
     #
     def self.prefix_match(seq1, seq2)
-      seq1 == seq2 ? JCore::Match.new(1) : nil
+      seq1 == seq2 ? JCore::Match.new( 0 ) : nil
     end
     
     protected
@@ -70,8 +73,9 @@ module JCore
     #
     # Something that may be tweaked.
     #
-    def self.optimal_distance(seq1, seq2)
-      [seq1.size, seq2.size].min / 10
+    def self.optimal_distance(seq1, seq2, max_length)
+      d = ( max_length * [seq1.size, seq2.size].min ) / ( max_length * 5 )
+      d > 5 ? 5 : d
     end
     
   end
@@ -114,9 +118,9 @@ module JCore
       "<Template:#{object_id} @source:#{source} @fields:[ #{fields.join(', ')} ]>"
     end
     
-    def serialize(file)
+    def self.serialize(data, file)
       File.open(file, 'wb') do |file|
-        file << Marshal.dump(self)
+        file << Marshal.dump(data)
       end
     end
     

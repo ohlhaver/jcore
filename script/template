@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+require File.join(File.dirname(__FILE__), '../jcore')
+require 'pp'
+require 'optparse'
+
+options = {}
+
+OptionParser.new do |opts|
+  opts.banner = "Usage:\n    ruby #{$0} -s source1,source2,source3.."
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    options[:verbose] = v
+  end
+  opts.on("-s", "--sources x,y,z", Array, "List of sources") do |list|
+    options[:sources] = list
+  end
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+end.parse!
+STDERR<<"Required option -s not specified\n" && exit if options[:sources].nil? || options[:sources].empty?
+
+LearnedTemplatesHome = File.expand_path( File.join( File.dirname(__FILE__), "../data/learned_templates" ) ).freeze
+
+options[:sources].each do |source|
+  input_file = Dir[ "#{LearnedTemplatesHome}/#{source}.jseq" ].first
+  puts "SOURCE: #{source}\n"
+  if input_file.nil?
+    puts "No templates found."
+    next
+  end
+  templates = JCore::Template.load(input_file)
+  templates.each_with_index do |template, index|
+    puts "#{index+1}. ".rjust(6) << template.source
+    template.fields.each do |field|
+      puts "        Field: #{field}"
+      STDOUT<<"        Prefix: "
+      PP.singleline_pp template[field].prefix
+      STDOUT<<"\n        Suffix: "
+      PP.singleline_pp template[field].suffix
+      STDOUT<<"\n"
+    end
+    puts "-"*80
+  end
+end

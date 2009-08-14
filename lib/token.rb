@@ -99,7 +99,8 @@ module JCore
     def core_token(token)
       start_match = token.to_s.match(/(<!?\/?[\w\-]+)/)
       end_match = token.to_s.match(/((\-\-)?(\/)?>)/)
-      t = (start_match ? "#{start_match[1]}#{end_match[1]}" : token).to_sym
+      t = (start_match ? "#{start_match[1]}#{end_match[1]}" : token.to_s)
+      ( t.match(/<!\-\-.+\-\->/) ? '<!---->' : t ).downcase.to_sym
     end
     #
     # Extracts the label from the token

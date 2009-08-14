@@ -5,7 +5,7 @@ module JCore
     def store( key, value )
       return super( key,value ) unless has_key?( key ) && fetch( key )
       old_value = fetch( key )
-      new_value = old_value.is_a?( Array ) ? old_value.push( value ) : [ old_value, value ]
+      new_value = old_value.is_a?( Array ) ? ( old_value.include?( value ) ? old_value : old_value.push( value ) ) : ( old_value == value ) ? old_value : [ old_value, value ]
       super( key, new_value )
     end
     
@@ -61,7 +61,7 @@ module JCore
           token.meta_id = ( index += 1 )
           suffix_buf.push( token ) if token.is_token?
           data_buf.push( token )
-          if ( match = JCore::Pattern.suffix_match( suffix_buf.tokens, suffix ) )
+          if ( match = JCore::Pattern.suffix_match( suffix_buf.tokens, suffix, template.max_length ) )
             match.index =  ( suffix_buf.first.meta_id rescue 1 )
             possible_matches << match
           else
