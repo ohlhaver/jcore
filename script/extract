@@ -4,7 +4,7 @@ require 'pp'
 require 'optparse'
 require 'open-uri'
 
-options = {}
+options = { :optimize => true }
 
 OptionParser.new do |opts|
   opts.banner = "Usage:\n    ruby #{$0} -s source -u url1,url2,url3.."
@@ -16,6 +16,9 @@ OptionParser.new do |opts|
   end
   opts.on("-s", "--source s", String, "Source name [Required]") do |s|
     options[:source] = s
+  end
+  opts.on("-o", "Turn off template optimization") do |m|
+    options[:optimize] = false
   end
   opts.on("-h", "--help", "Show this message") do
     puts opts
@@ -30,8 +33,10 @@ input_file = Dir[ "#{LearnedTemplatesHome}/#{options[:source]}.jseq" ].first
 STDERR<<"Template Error: Do not know about the source - #{options[:source]}\n" && exit if input_file.nil?
 
 templates = JCore::Template.load(input_file)
+templates = JCore::Template.optimize_templates(templates) if options[:optimize]
+
 options[:urls].each_with_index do |url, index|
-  puts "#{index+1}. ".rjust(3) << url
+  puts url
   doc = open( url ).read
   information = JCore::Extracter.extract( doc, templates )
   puts "Headline"
@@ -40,8 +45,14 @@ options[:urls].each_with_index do |url, index|
   puts "\nAuthor"
   puts "------"
   puts information[:author] || "Information not found"
+  puts "\nImage"
+  puts "------"
+  puts information[:image] || "Information not found"
   puts "\nStory"
   puts "-----"
-  puts information[:story] || "Information not found"
+  puts "Information not found" if information[:story].nil? || information[:story].empty?
+  information[:story].to_a.each_with_index do |story, index|
+    puts "#{(index+1).to_s.rjust(4)}. FRAGMENT\n #{story}"
+  end
   puts "-"*80
 end

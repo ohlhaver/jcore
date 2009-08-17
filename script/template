@@ -13,6 +13,9 @@ OptionParser.new do |opts|
   opts.on("-s", "--sources x,y,z", Array, "List of sources") do |list|
     options[:sources] = list
   end
+  opts.on("-m", "Merged Version") do |m|
+    options[:merge] = true
+  end
   opts.on_tail("-h", "--help", "Show this message") do
     puts opts
     exit
@@ -30,6 +33,7 @@ options[:sources].each do |source|
     next
   end
   templates = JCore::Template.load(input_file)
+  templates = JCore::Template.optimize_templates(templates) if options[:merge]
   templates.each_with_index do |template, index|
     puts "#{index+1}. ".rjust(6) << template.source
     template.fields.each do |field|

@@ -114,7 +114,7 @@ module JCore
   #
   class Tokenizer <  BaseTokenizer
     
-    Exceptions = { :'<script>' => :'</script>', :'<object>' => :'</object>', :'<style>' => :'</style>', 
+    Exceptions = { :'<script>' => :'</script>', :'<noscript>' => :'</noscript>', :'<object>' => :'</object>', :'<style>' => :'</style>', 
       :'<!---->' => true, :'<script/>' => true, :'<style/>' => true, :'<object/>' => true }
     
     def next

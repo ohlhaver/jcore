@@ -12,7 +12,7 @@ module JCore
     end
     
     def <=>(other)
-      score <=> other.score
+      score == other.score ? index <=> other.index : score <=> other.score
     end
     
   end
@@ -52,6 +52,18 @@ module JCore
     #
     def self.prefix_match(seq1, seq2)
       seq1 == seq2 ? JCore::Match.new( 0 ) : nil
+    end
+    #
+    # For a prefix there can be multiple suffix sequence found using different templates. It creates a unified suffix map for prefix patterns
+    #
+    def suffix_map
+      index = 0
+      prefix.inject({})do |map, p| 
+        map[p] ||= Array.new
+        map[p].push( suffix[index] ) unless map[p].include?( suffix[index] )
+        index += 1
+        map
+      end
     end
     
     protected
@@ -101,15 +113,16 @@ module JCore
       @max_length = max_length
     end
     #
-    #
+    # Matches the prefix sequence to the buffer sequence
     #
     def prefix_match(buf)
       each_pair do | field, pattern |
-        pattern.prefix.each_with_index do | prefix_pattern, index |
-          return field, pattern.suffix[index] if Pattern.prefix_match( prefix_pattern, buf )
+        suffix_map = pattern.suffix_map
+        pattern.prefix.each do | prefix_pattern |
+          yield( field, prefix_pattern, suffix_map[prefix_pattern] ) if Pattern.prefix_match( prefix_pattern, buf )
         end
       end
-      return nil, nil
+      return self
     end
     #
     #
@@ -117,7 +130,38 @@ module JCore
     def inspect
       "<Template:#{object_id} @source:#{source} @fields:[ #{fields.join(', ')} ]>"
     end
-    
+    #
+    # Optimize Templates
+    # This partitions the templates into group of same max_length and then merges each of them
+    # Assumes the template.fields are same for each template.
+    #
+    def self.optimize_templates(templates)
+      groups = templates.inject({}) do |hash, template|
+        hash[template.max_length] ||= Array.new
+        hash[template.max_length].push(template)
+        hash
+      end
+      groups.keys.sort.collect{ |key| merge(groups[key]) }
+    end
+    #
+    # Merging Templates - Templates must be of same max_length.
+    #
+    def self.merge(templates)
+      return templates.first if templates.size < 2  
+      fields = templates.first.fields
+      max_length = templates.first.max_length
+      merged_template = self.new( fields, "merged_#{max_length}", max_length )
+      templates.each do |template|
+        template.fields.each do |field|
+          template[field].prefix.each{ |prefix| merged_template[field].prefix.push(prefix) }
+          template[field].suffix.each{ |suffix| merged_template[field].suffix.push(suffix) }
+        end
+      end
+      return merged_template
+    end
+    #
+    #
+    #
     def self.serialize(data, file)
       File.open(file, 'wb') do |file|
         file << Marshal.dump(data)

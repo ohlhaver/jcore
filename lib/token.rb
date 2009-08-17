@@ -33,17 +33,19 @@ module JCore
   # JCore::Token objects are returned by the JCore::Tokenizer
   #
   class Token < String
+    
+    Exceptions = [:'<img>', :'<img/>']
 
     attr_reader :token
     attr_reader :label
     attr_reader :tag_type
     attr_accessor :meta_id
 
-    def initialize( token, text = "" )
-      super(text)
+    def initialize( token, text = nil )
       @token = core_token(token)
       @label = extract_label(@token)
       @tag_type = extract_tag_type(@token)
+      super(text || token.to_s)
     end
     #
     # All those tokens which we want to include in the 
@@ -88,7 +90,7 @@ module JCore
     #
     #
     def to_s
-      is_token? ? token.to_s : super
+      is_token? && !Exceptions.include?(token) ? token.to_s : super
     end
     
     protected

@@ -34,7 +34,7 @@ describe JCore::Extracter do
     
     before do
       document = File.open(File.dirname(__FILE__) + '/data/labeled/story_001.html').read
-      template = JCore::Template.new([:author, :summary, :text], :ft, 20)
+      template = JCore::Template.new([:author, :summary, :text], :ft, 7)
       template = JCore::Learner.learn(document, template)
       document = File.open(File.dirname(__FILE__) + '/data/unlabeled/story_002.html').read
       @information = JCore::Extracter.extract(document, template)

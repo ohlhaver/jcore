@@ -35,7 +35,7 @@ options[:sources].each do |source|
   input_files.each do |file|
     document = File.open(file).read
     k = file.match(/\.k(\d+)\./)[1].to_i
-    template = JCore::Template.new([:headline, :author, :story], file, k)
+    template = JCore::Template.new([:headline, :author, :image, :story], file, k)
     template = JCore::Learner.learn(document, template)
     templates << template
   end
