@@ -1,5 +1,52 @@
 module JCore
   
+  
+  class XPathCommand
+    
+    attr_reader :xpath
+    attr_reader :convert
+    attr_reader :selection
+    
+    def initialize(text)
+      @convert = 'inner_html'
+      tokens = text.split(' ').uniq.select{|x| !x.empty? }
+      @xpath = tokens.shift
+      while( token = tokens.shift) 
+        case (token) when 'first' : @selection = 'first'
+        when 'to_s' : @convert = 'to_s' 
+        end
+      end
+    end
+    
+    def match(doc)
+      data = (doc/xpath).to_a
+      result = data.collect{ |x| x.send( convert ) }
+      result = result.send( selection ) if selection
+      return result
+    end
+    
+  end
+  
+  
+  class XPath
+    
+    # Chain of fallback options
+    attr_reader :xpaths
+    
+    def initialize(xpath)
+      @xpaths = xpath.to_s.split(',').collect{ |x| JCore::XPathCommand.new(x.strip) }
+    end
+    
+    def match(doc)
+      xpaths.each do |xpath|
+        result = xpath.match( doc )
+        return( result ) if result && !result.empty?
+      end
+      return nil
+    end
+    
+  end
+  
   # Lower the score better is the match
   # 0 == Exact Match
   class Match
@@ -51,7 +98,7 @@ module JCore
     # Prefix Match are Exact
     #
     def self.prefix_match(seq1, seq2)
-      seq1 == seq2 ? JCore::Match.new( 0 ) : nil
+      seq1.any? && seq1 == seq2 ? JCore::Match.new( 0 ) : nil
     end
     #
     # For a prefix there can be multiple suffix sequence found using different templates. It creates a unified suffix map for prefix patterns
@@ -99,16 +146,19 @@ module JCore
   # 
   class Template < Hash
     
+    attr_reader :xpath      # data that is extracted using xpath
     attr_reader :fields     # fields to be extracted e.g. :author, :title, :image, :text
     attr_reader :source     # news_story source
     attr_reader :max_length # max_length of the prefix or suffix pattern
     
     def initialize( fields, source = nil, max_length = 20 )
       raise ArguementError unless fields.is_a?(Array)
+      @xpath = Hash.new
       @source = source
       @fields = fields.collect{ |x| x.to_sym }
       fields.each do |field|
         self[field] = Pattern.new
+        @xpath[field] = Array.new
       end
       @max_length = max_length
     end
@@ -153,6 +203,7 @@ module JCore
       merged_template = self.new( fields, "merged_#{max_length}", max_length )
       templates.each do |template|
         template.fields.each do |field|
+          template.xpath[field].each { |path| merged_template.xpath[field].push(path) }
           template[field].prefix.each{ |prefix| merged_template[field].prefix.push(prefix) }
           template[field].suffix.each{ |suffix| merged_template[field].suffix.push(suffix) }
         end

@@ -92,6 +92,13 @@ module JCore
     def to_s
       is_token? && !Exceptions.include?(token) ? token.to_s : super
     end
+    #
+    # If labeled attribute has xpath with it
+    #
+    def xpath
+      match = self.match(/xpath\W*=\W*"([^"]+)"/) || self.match(/xpath\W*=\W*'([^']+)'/)
+      match ? match[1] : nil
+    end
     
     protected
     #
@@ -109,7 +116,7 @@ module JCore
     # e.g. for <author-label> :author is returned
     #
     def extract_label(token)
-      label = token.to_s.match(/<\/?(.+)-label>/)
+      label = token.to_s.match(/<\/?(.+)-label\W*\/?>/)
       label = label[1].to_sym if label
       return label
     end

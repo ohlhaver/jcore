@@ -25,7 +25,7 @@ Scripts
 </p>
 
 ### How to learn?
-<pre><code>ruby script/learn -s times
+<pre><code>ruby script/learn -s time
 ruby script/learn -s nytimes</code>
 </pre>
 
@@ -43,14 +43,14 @@ prefix/suffix length for the template is <code>5</code>.
 </p>
 
 ### How to inspect the template learned?
-<pre><code>ruby script/template -s times
+<pre><code>ruby script/template -s time
 ruby script/template -s nytimes</code>
 </pre>
 
 <p>This will show the template structure.</p>
 
 ### How to extract information?
-<pre><code>ruby script/extract -s times -u "http://www.time.com/time/nation/article/0,8599,1915835,00.html"
+<pre><code>ruby script/extract -s time -u "http://www.time.com/time/nation/article/0,8599,1915835,00.html"
 ruby script/extract -s nytimes -u "http://www.nytimes.com/2009/08/14/opinion/14krugman.html"</code>
 </pre>
 

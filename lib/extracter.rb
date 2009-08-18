@@ -1,3 +1,10 @@
+require 'rubygems'
+require 'hpricot'
+# begin
+# require 'ruby-debug'
+# rescue StandardError
+# end
+
 module JCore
   
   class DataHash < Hash
@@ -5,7 +12,8 @@ module JCore
     def store( key, value )
       return super( key,value ) unless has_key?( key ) && fetch( key )
       old_value = fetch( key )
-      new_value = old_value.is_a?( Array ) ? ( old_value.include?( value ) ? old_value : old_value.push( value ) ) : ( old_value == value ) ? old_value : [ old_value, value ]
+      new_value = old_value.is_a?( Array ) ? ( old_value.include?( value ) ? old_value : 
+        value.is_a?( Array ) ? ( old_value + value ) : old_value.push( value ) ) : ( old_value == value ) ? old_value : [ old_value, value ]
       super( key, new_value )
     end
     
@@ -29,7 +37,27 @@ module JCore
           extract_information( tokenizer, template, information )
           tokenizer.reset
         end
+        doc = Hpricot( data )
+        templates.each do |template|
+          extract_xpath_information( doc, template, information )
+        end
         return information
+      end
+      #
+      #
+      #
+      def extract_xpath_information( doc, template, information )
+        template.xpath.each_pair do |field, xpaths|
+          xpaths.each do |xpath|
+            begin
+              data = JCore::XPath.new( xpath ).match( doc )
+              #puts data
+              information.store( field, data ) if data && !data.empty?
+            rescue StandardError => message
+              puts message
+            end
+          end
+        end
       end
       #
       # Extracts information from one template
@@ -45,6 +73,10 @@ module JCore
               next if prefixes[ prefix ] # This prefix pattern has already met with success
               prefixes[ prefix ] = extract_field( field, suffixes, tokenizer, template, information )
               tokenizer.reset( tokenizer_state )
+              prefixes[ prefix ].times do
+                token = tokenizer.next 
+                buf.push(token) if token && token.is_token? 
+              end if prefixes[ prefix ] # Either false or Number of Tokens that needs to be skipped
             end
           end
         end
@@ -62,18 +94,20 @@ module JCore
         # We want to choose the best match score that is available
         while ( token = tokenizer.next )
           token.meta_id = ( index += 1 )
-          suffix_buf.push( token ) if token.is_token?
           data_buf.push( token )
-          suffixes.each do |suffix|
-            if ( match = JCore::Pattern.suffix_match( suffix_buf.tokens, suffix, template.max_length ) )
-              match.index =  ( suffix_buf.first.meta_id rescue 1 )
-              possible_matches << match
-            else
-              break if !possible_matches.empty? && attempts == 0
-              attempts += -1
+          if token.is_token?
+            suffix_buf.push( token ) 
+            suffixes.each do |suffix|
+              if ( match = JCore::Pattern.suffix_match( suffix_buf.tokens, suffix, template.max_length ) )
+                match.index =  ( suffix_buf.first.meta_id rescue 1 )
+                possible_matches << match
+              else
+                break if !possible_matches.empty? && attempts == 0
+                attempts += -1
+              end
             end
+            break if !possible_matches.empty? && attempts == 0
           end
-          break if !possible_matches.empty? && attempts == 0
         end
         possible_matches.sort! # The first one after sorting contains the best information
         if possible_matches.any?
@@ -82,9 +116,9 @@ module JCore
           # information we look should not ideally contain lots of div elements. So if div elements match is higher than threshold the data should avoided
           ntokens = data.inject(0){ |sum, token| sum += ( token.start_tag? ? 1 : 0 ) }
           divtokens = data.inject(0){ |sum, token| sum += ( token.token == :"<div>" ? 1 : 0 ) }
-          if divtokens.zero? || ( divtokens.to_f / ntokens < 0.25 ) 
+          if divtokens.zero? || ( divtokens.to_f / ntokens <= 0.5 ) 
             information.store( field, data.collect{ |x| x.to_s }.join( '' ) )
-            return true
+            return possible_matches.first.index
           end
         end
         return false

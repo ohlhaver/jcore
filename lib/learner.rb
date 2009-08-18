@@ -22,6 +22,9 @@ module JCore
               store_suffix_pattern_for( token.label, template, tokenizer ) # storing suffix pattern
               tokenizer.reset( tokenizer_state ) # reseting the current state of tokening
             end
+            if token.autoclosing_tag?
+              store_xpath_for( token, template )
+            end
           elsif token.is_token?
             buf.push( token ) # token should be pushed to the prefix buffer stream
           end
@@ -30,6 +33,12 @@ module JCore
       end
       
       protected
+      
+      
+      def store_xpath_for( token, template )
+        xpath = token.xpath
+        template.xpath[ token.label ].push( xpath.to_sym ) if xpath
+      end
       
       # Given the label, prefix buffer and template
       # Template is updated with the prefix pattern for the label

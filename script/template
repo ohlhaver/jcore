@@ -42,6 +42,8 @@ options[:sources].each do |source|
       PP.singleline_pp template[field].prefix
       STDOUT<<"\n        Suffix: "
       PP.singleline_pp template[field].suffix
+      STDOUT<<"\n        Xpath: "
+      PP.singleline_pp template.xpath[field]
       STDOUT<<"\n"
     end
     puts "-"*80
