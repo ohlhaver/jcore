@@ -33,11 +33,17 @@ options[:sources].each do |source|
   output_template = "#{LearnedTemplatesHome}/#{source}.jseq"
   templates = Array.new
   input_files.each do |file|
+    #puts "Learning file: #{file}"
     document = File.open(file).read
     k = file.match(/\.k(\d+)\./)[1].to_i
     template = JCore::Template.new([:headline, :author, :image, :story], file, k)
-    template = JCore::Learner.learn(document, template)
-    templates << template
+    begin
+      template = JCore::Learner.learn(document, template)
+    rescue StandardError => message
+      puts "Error: #{message}"
+    else
+      templates << template
+    end
   end
   JCore::Template.serialize(templates, output_template)
 end

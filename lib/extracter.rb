@@ -47,8 +47,8 @@ module JCore
       #
       #
       def extract_xpath_information( doc, template, information )
-        template.xpath.each_pair do |field, xpaths|
-          xpaths.each do |xpath|
+        template.fields.each do |field|
+          template.xpath[field].each do |xpath|
             begin
               data = JCore::XPath.new( xpath ).match( doc )
               #puts data

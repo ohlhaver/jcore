@@ -30,7 +30,7 @@ module JCore
       @position = @scanner.pos
       @line = @current_line
       if @scanner.check(/<\S/) && @scanner.check(/<!?[^<>]*>/)
-        Token.new(update_current_line(scan_tag).to_sym)
+        Token.new(update_current_line(scan_tag).to_sym) rescue self.next
       else
         Token.new(:text, update_current_line(scan_text))
       end

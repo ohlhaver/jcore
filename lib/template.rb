@@ -6,23 +6,38 @@ module JCore
     attr_reader :xpath
     attr_reader :convert
     attr_reader :selection
+    attr_reader :operations
     
     def initialize(text)
       @convert = 'inner_html'
+      @operations = Array.new
       tokens = text.split(' ').uniq.select{|x| !x.empty? }
       @xpath = tokens.shift
-      while( token = tokens.shift) 
-        case (token) when 'first' : @selection = 'first'
+      while( token = tokens.shift)
+        case( token ) when /^::delete::/ : @operations.push( [ 'delete', token.gsub('::delete::', '' ) ] )
         when 'to_s' : @convert = 'to_s' 
         end
       end
     end
     
     def match(doc)
-      data = (doc/xpath).to_a
-      result = data.collect{ |x| x.send( convert ) }
-      result = result.send( selection ) if selection
+      data = (doc/xpath)
+      operations.each do | method, subpath |
+        results = doc/subpath
+        results.each do |result|
+          data.send( method, result )
+        end
+      end
+      if data.is_a?( Array )
+        result = data.select{ |x| !x.nil? }.collect{ |x| x.send( convert ) } 
+      else
+        result = data ? data.send( convert ) : ""
+      end
       return result
+    end
+    
+    def operation?(text)
+      text.match(/op\(/)
     end
     
   end
