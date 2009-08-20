@@ -32,7 +32,7 @@ module JCore
   #
   # JCore::Token objects are returned by the JCore::Tokenizer
   #
-  class Token < String
+  class Token
     
     Exceptions = [:'<img>', :'<img/>']
 
@@ -40,12 +40,13 @@ module JCore
     attr_reader :label
     attr_reader :tag_type
     attr_accessor :meta_id
+    attr_reader :text
 
     def initialize( token, text = nil )
       @token = core_token(token)
       @label = extract_label(@token)
       @tag_type = extract_tag_type(@token)
-      super(text || token.to_s)
+      @text = (text || token.to_s)
     end
     #
     # All those tokens which we want to include in the 
@@ -53,6 +54,10 @@ module JCore
     #
     def is_token?
       token != :text
+    end
+    # If it is modifier block
+    def modifier?
+      label == :'modify-doc'
     end
     #
     # If it is user annotated label
@@ -84,19 +89,29 @@ module JCore
     # For irb
     #
     def inspect
-      "#{token}#{ ": #{self}" unless self.empty? }"
+      "#{token}#{ ": #{text}" unless self.empty? }"
+    end
+    #
+    #
+    #
+    def to_str
+      is_token? && !Exceptions.include?(token) ? token.to_s : text.to_s
     end
     #
     #
     #
     def to_s
-      is_token? && !Exceptions.include?(token) ? token.to_s : super
+      text.to_s
     end
     #
     # If labeled attribute has xpath with it
     #
     def xpath
-      match = self.match(/xpath\W*=\W*"([^"]+)"/) || self.match(/xpath\W*=\W*'([^']+)'/)
+      attr_value('xpath')
+    end
+    
+    def attr_value(name)
+      match = text.match(/#{name}\W*=\W*"([^"]+)"/) || text.match(/#{name}\W*=\W*'([^']+)'/)
       match ? match[1] : nil
     end
     
@@ -118,6 +133,7 @@ module JCore
     def extract_label(token)
       label = token.to_s.match(/<\/?(.+)-label\W*\/?>/)
       label = label[1].to_sym if label
+      label = :'modify-doc' if label.nil? && token.to_s.match(/<\/?modify-doc\W*>/)  
       return label
     end
     #
@@ -133,6 +149,6 @@ module JCore
       tag_type = :opening if token.match(/<[^\/]+>/)
       return tag_type
     end
-    
+
   end
 end

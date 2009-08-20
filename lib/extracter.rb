@@ -12,8 +12,16 @@ module JCore
     def store( key, value )
       return super( key,value ) unless has_key?( key ) && fetch( key )
       old_value = fetch( key )
-      new_value = old_value.is_a?( Array ) ? ( old_value.include?( value ) ? old_value : 
-        value.is_a?( Array ) ? ( old_value + value ) : old_value.push( value ) ) : ( old_value == value ) ? old_value : [ old_value, value ]
+      new_value = case(old_value) when NilClass : value
+      when Array : old_value
+      else [ old_value ] end 
+      if new_value.is_a?(Array)
+        values = value.is_a?(Array) ? value : [ value ]
+        values.each do | value |
+          next if new_value.include?( value )
+          new_value.push( value )
+        end
+      end
       super( key, new_value )
     end
     
@@ -32,6 +40,10 @@ module JCore
         templates = [ templates ] if templates.is_a?( JCore::Template )
         raise ArguementError unless templates.is_a?( Array )
         information = DataHash.new
+        # Apply all the modifications
+        templates.each do |template|
+          data = template.modify_doc( data )
+        end
         tokenizer = JCore::Tokenizer.new( data )
         templates.each do |template|
           extract_information( tokenizer, template, information )
@@ -50,7 +62,8 @@ module JCore
         template.fields.each do |field|
           template.xpath[field].each do |xpath|
             begin
-              data = JCore::XPath.new( xpath ).match( doc )
+              xpath, options = xpath.is_a?(Array) ? xpath : [xpath, {}] 
+              data = JCore::XPath.new( xpath, options ).match( doc )
               #puts data
               information.store( field, data ) if data && !data.empty?
             rescue StandardError => message
@@ -117,7 +130,7 @@ module JCore
           ntokens = data.inject(0){ |sum, token| sum += ( token.start_tag? ? 1 : 0 ) }
           divtokens = data.inject(0){ |sum, token| sum += ( token.token == :"<div>" ? 1 : 0 ) }
           if divtokens.zero? || ( divtokens.to_f / ntokens <= 0.5 ) 
-            information.store( field, data.collect{ |x| x.to_s }.join( '' ) )
+            information.store( field, data.collect{ |x| x.to_str }.join( '' ) )
             return possible_matches.first.index
           end
         end

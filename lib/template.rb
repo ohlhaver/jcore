@@ -1,6 +1,14 @@
+require 'rubygems'
+require 'hpricot'
+
 module JCore
   
-  
+  #
+  # XPath Command takes more than one xpath commands separated by comma
+  # Each command
+  #  can take directives like ::delete::, ::select::
+  #  and can also take string convertion method inner_html ( default ), to_s ( calls to_s ), text ( calls inner_text ) when converting Hpricot Elements to strings
+  #
   class XPathCommand
     
     attr_reader :xpath
@@ -15,24 +23,28 @@ module JCore
       @xpath = tokens.shift
       while( token = tokens.shift)
         case( token ) when /^::delete::/ : @operations.push( [ 'delete', token.gsub('::delete::', '' ) ] )
+        when /^::select::/ : @selection = token.gsub('::select::', '')
         when 'to_s' : @convert = 'to_s' 
+        when 'text' : @convert = 'inner_text'
         end
       end
     end
     
-    def match(doc)
+    def match(doc, options={})
       data = (doc/xpath)
+      # For now used only for the delete
       operations.each do | method, subpath |
         results = doc/subpath
         results.each do |result|
           data.send( method, result )
         end
       end
-      if data.is_a?( Array )
-        result = data.select{ |x| !x.nil? }.collect{ |x| x.send( convert ) } 
-      else
-        result = data ? data.send( convert ) : ""
-      end
+      result = data.select{ |x| !x.nil? } # remove items which are nil
+      result = result.select{ |x| x.send(selection) } if selection # Do the selection based on some criteria text? elem? etc.
+      result = result.collect{ |x| x.send( convert ) }  # Do the converstion to text using to_s/inner_html/inner_text
+      result.collect!{ |x| x.match(/#{options[:match]}/m).to_s } if options[:match] # Do the matching to subselect the result
+      result = result.select{ |x| !whitespace?(x) } # Remove the whitespace from the results
+      result = result.first if result.size < 2 # Return the first element if result set contains less than 2 elementss
       return result
     end
     
@@ -40,24 +52,70 @@ module JCore
       text.match(/op\(/)
     end
     
+    protected
+    
+    def whitespace?( text )
+      text ? text.match(/\A\s*\z/) : nil
+    end
+    
   end
   
   
+  #
+  # Options can be attributes like match <foo-label xpath="xpath-command" match="\(.+\)\s+$" />
+  #
   class XPath
     
     # Chain of fallback options
     attr_reader :xpaths
+    attr_reader :options
     
-    def initialize(xpath)
+    def initialize(xpath, options={})
       @xpaths = xpath.to_s.split(',').collect{ |x| JCore::XPathCommand.new(x.strip) }
+      @options = options
     end
     
     def match(doc)
       xpaths.each do |xpath|
-        result = xpath.match( doc )
+        result = xpath.match( doc, options )
         return( result ) if result && !result.empty?
       end
       return nil
+    end
+    
+  end
+  
+  #
+  # Document modifier uses Hpricot to find the element and to do some stuff around it
+  # e.g. delete the element, insert before, insert after, replace the element
+  #
+  class Mod
+    
+    attr_reader :at
+    attr_reader :action
+    attr_reader :text
+    
+    def initialize( at, action, text )
+      @at = at
+      @action = action
+      @text = text
+    end
+    
+    def apply( doc )
+      hdoc = Hpricot(doc)
+      elem = hdoc.at(at)
+      return nil unless elem
+      text = elem.to_s
+      hdoc.to_s.gsub( text, modified_text( text ) )
+    end
+    
+    protected
+    
+    def modified_text( text )
+      case action when 'insert_before' : "#{@text}#{text}" 
+      when 'insert_after' : "#{text}#{@text}"
+      when 'replace' :  @text.to_s
+      when 'delete' : '' end
     end
     
   end
@@ -161,6 +219,7 @@ module JCore
   # 
   class Template < Hash
     
+    attr_accessor :modifiers  # which preprocess and modify the document
     attr_reader :xpath      # data that is extracted using xpath
     attr_reader :fields     # fields to be extracted e.g. :author, :title, :image, :text
     attr_reader :source     # news_story source
@@ -170,12 +229,23 @@ module JCore
       raise ArguementError unless fields.is_a?(Array)
       @xpath = Hash.new
       @source = source
+      @modifiers = Array.new
       @fields = fields.collect{ |x| x.to_sym }
       fields.each do |field|
         self[field] = Pattern.new
         @xpath[field] = Array.new
       end
       @max_length = max_length
+    end
+    #
+    # Modify the doc before doing any extraction
+    #
+    def modify_doc( doc )
+      return doc if modifiers.nil? || modifiers.empty?
+      modifiers.each do |mod|
+        doc = mod.apply( doc )
+      end
+      return doc
     end
     #
     # Matches the prefix sequence to the buffer sequence

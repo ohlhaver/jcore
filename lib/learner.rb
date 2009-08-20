@@ -15,7 +15,9 @@ module JCore
         buf = JCore::TokenBuffer.new( template.max_length ) # Prefix Token Buffer Stream
         tokenizer = Tokenizer.new( annotated_data )
         while ( token = tokenizer.next )
-          if token.is_label?
+          if token.modifier? && token.start_tag?
+            store_modifier_text(template, token, tokenizer)
+          elsif token.is_label?
             if token.start_tag? && template.fields.include?( token.label )
               store_prefix_pattern_for( token.label, template, buf ) # storing prefix pattern
               tokenizer_state = tokenizer.current_state # storing the current state of tokenizer
@@ -35,9 +37,28 @@ module JCore
       protected
       
       
+      def modifier_text( tokenizer )
+        text = ""
+        while ( token = tokenizer.next )
+          break if token.modifier? && token.end_tag?
+          text << token.text
+        end
+        return text
+      end
+      
+      def store_modifier_text( template, token, tokenizer )
+        at = token.attr_value('at')
+        action = token.attr_value('action')
+        text = modifier_text( tokenizer )
+        template.modifiers ||= Array.new
+        template.modifiers.push( JCore::Mod.new(at, action, text) )
+      end
+      
       def store_xpath_for( token, template )
         xpath = token.xpath
-        template.xpath[ token.label ].push( xpath.to_sym ) if xpath
+        options = {}
+        options[:match] = token.attr_value('match') if token.attr_value('match')
+        template.xpath[ token.label ].push( [ xpath, options ] ) if xpath
       end
       
       # Given the label, prefix buffer and template

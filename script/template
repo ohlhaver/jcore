@@ -36,6 +36,17 @@ options[:sources].each do |source|
   templates = JCore::Template.optimize_templates(templates) if options[:merge]
   templates.each_with_index do |template, index|
     puts "#{index+1}. ".rjust(6) << template.source
+    
+    if template.modifiers
+      puts "        Document Modifiers: "
+      template.modifiers.each_with_index do |mod, index|
+        puts "        #{(index+1).to_s.rjust(2)}. Modifier"
+        puts "            At: #{mod.at}"
+        puts "            Action: #{mod.action}"
+        puts "            Text: #{mod.text}"
+      end
+    end
+    
     template.fields.each do |field|
       puts "        Field: #{field}"
       STDOUT<<"        Prefix: "
