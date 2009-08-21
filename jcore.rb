@@ -1,3 +1,5 @@
+require File.join( File.dirname(__FILE__), 'lib/xpath')
+require File.join( File.dirname(__FILE__), 'lib/pattern')
 require File.join( File.dirname(__FILE__), 'lib/template')
 require File.join( File.dirname(__FILE__), 'lib/token')
 require File.join( File.dirname(__FILE__), 'lib/tokenizer')

@@ -1,0 +1,50 @@
+#!/usr/bin/env ruby
+require File.join(File.dirname(__FILE__), '../lib/clean')
+require 'optparse'
+
+options = { :language => 'en'}
+
+OptionParser.new do |opts|
+  opts.banner = "Usage:\n    ruby #{$0} -s source -u url1,url2,url3.."
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    options[:verbose] = v
+  end
+  opts.on("-k", "--keywords s", String, "Story Text") do |s|
+    options[:keywords] = s
+  end
+  opts.on("-i", "--image i", String, "Image Text") do |i|
+    options[:image] = i
+  end
+  opts.on("-u", "--url u", String, "Article URL for correct image link") do |u|
+    options[:url] = u
+  end
+  opts.on("-t", "--headline h", String, "Headline Text") do |h|
+    options[:headline] = h
+  end
+  opts.on("-a", "--author s", String, "Author Text") do |s|
+    options[:author] = s
+  end
+  opts.on("-l", "--language l", String, "Language [Default: en]") do |l|
+    options[:language] = l
+  end
+  opts.on("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+end.parse!
+
+if options[:author]
+  puts JCore::Clean.author( options[:author], options[:language] )
+end
+
+if options[:keywords]
+  puts JCore::Clean.keywords( options[:keywords] )
+end
+
+if options[:headline]
+  puts JCore::Clean.headline( options[:headline] )
+end
+
+if options[:image]
+  puts JCore::Clean.image( options[:image], options[:url] )
+end

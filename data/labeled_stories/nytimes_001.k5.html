@@ -353,10 +353,11 @@ Latest Political News</a></li>
 
 <h1>
 <nyt_headline version="1.0" type=" ">
-<headline-label>Obama Gives Medal of Freedom to 16 Luminaries</headline-label>
+<headline-label xpath="div#article/h1:first/nyt_headline:first" />
+Obama Gives Medal of Freedom to 16 Luminaries
 </nyt_headline>
 </h1>
- 
+<image-label xpath="div#article/div.image/img:first to_s" />
 <div class="image" id="wideImage">
 <img src="ny_times_001_files/13obama_600.jpg" alt="" border="0" height="180" width="600">
 <div class="credit">Photographs by Doug Mills/The New York Times</div>
@@ -439,7 +440,7 @@ function getSharePubdate() {
 </div>
 
 <nyt_byline version="1.0" type=" ">
-<div class="byline"><author-label>By <a href="http://topics.nytimes.com/top/reference/timestopics/people/s/sheryl_gay_stolberg/index.html?inline=nyt-per" title="More Articles by Sheryl Gay Stolberg">SHERYL GAY STOLBERG</a></author-label></div>
+<div class="byline"><author-label xpath="div#article/nyt_byline/div.byline/a, div#article/nyt_byline/div.byline" />By <a href="http://topics.nytimes.com/top/reference/timestopics/people/s/sheryl_gay_stolberg/index.html?inline=nyt-per" title="More Articles by Sheryl Gay Stolberg">SHERYL GAY STOLBERG</a></div>
 </nyt_byline>
 <div class="timestamp">Published: August 12, 2009 </div>
 <div id="articleBody">
@@ -454,10 +455,10 @@ function getSharePubdate() {
 <nyt_text>
 
 
-    <story-label><p>WASHINGTON &#8212; <a href="http://topics.nytimes.com/top/reference/timestopics/people/o/barack_obama/index.html?inline=nyt-per" title="More articles about Barack Obama.">President Obama</a>
+    <story-label xpath="div#articleBody/nyt_text/p text" /><p>WASHINGTON &#8212; <a href="http://topics.nytimes.com/top/reference/timestopics/people/o/barack_obama/index.html?inline=nyt-per" title="More articles about Barack Obama.">President Obama</a>
 took a break from the vitriol of the health care debate on Wednesday to
 bestow the Presidential Medal of Freedom on 16 luminaries in theater,
-sports, science, the humanities and politics, including Senator <a href="http://topics.nytimes.com/top/reference/timestopics/people/k/edward_m_kennedy/index.html?inline=nyt-per" title="More articles about Edward M. Kennedy.">Edward M. Kennedy</a>, Archbishop <a href="http://topics.nytimes.com/top/reference/timestopics/people/t/desmond_m_tutu/index.html?inline=nyt-per" title="More articles about Desmond M. Tutu">Desmond Tutu</a>, the tennis great <a href="http://topics.nytimes.com/top/reference/timestopics/people/k/billie_jean_king/index.html?inline=nyt-per" title="More articles about Billie Jean King.">Billie Jean King</a>, the actor <a href="http://topics.nytimes.com/top/reference/timestopics/people/p/sidney_poitier/index.html?inline=nyt-per" title="More articles about Sidney Poitier.">Sidney Poitier</a> and the physicist <a href="http://topics.nytimes.com/top/reference/timestopics/people/h/stephen_w_hawking/index.html?inline=nyt-per" title="More articles about Stephen W. Hawking.">Stephen Hawking</a>.</p></story-label>
+sports, science, the humanities and politics, including Senator <a href="http://topics.nytimes.com/top/reference/timestopics/people/k/edward_m_kennedy/index.html?inline=nyt-per" title="More articles about Edward M. Kennedy.">Edward M. Kennedy</a>, Archbishop <a href="http://topics.nytimes.com/top/reference/timestopics/people/t/desmond_m_tutu/index.html?inline=nyt-per" title="More articles about Desmond M. Tutu">Desmond Tutu</a>, the tennis great <a href="http://topics.nytimes.com/top/reference/timestopics/people/k/billie_jean_king/index.html?inline=nyt-per" title="More articles about Billie Jean King.">Billie Jean King</a>, the actor <a href="http://topics.nytimes.com/top/reference/timestopics/people/p/sidney_poitier/index.html?inline=nyt-per" title="More articles about Sidney Poitier.">Sidney Poitier</a> and the physicist <a href="http://topics.nytimes.com/top/reference/timestopics/people/h/stephen_w_hawking/index.html?inline=nyt-per" title="More articles about Stephen W. Hawking.">Stephen Hawking</a>.</p>
 <div id="articleInline" class="inlineLeft">
 <div id="inlineBox"><a href="#secondParagraph" class="jumpLink">Skip to next paragraph</a>
   

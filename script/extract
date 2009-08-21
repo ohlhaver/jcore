@@ -3,6 +3,7 @@ require File.join(File.dirname(__FILE__), '../jcore')
 require 'pp'
 require 'optparse'
 require 'open-uri'
+require 'iconv'
 
 options = { :optimize => true }
 
@@ -37,7 +38,9 @@ templates = JCore::Template.optimize_templates(templates) if options[:optimize]
 
 options[:urls].each_with_index do |url, index|
   puts url
-  doc = open( url ).read
+  file = open( url )
+  doc = Iconv.conv( 'utf-8', file.charset, file.read )
+  
   information = JCore::Extracter.extract( doc, templates )
   puts "Headline"
   puts "--------"
@@ -51,7 +54,8 @@ options[:urls].each_with_index do |url, index|
   puts "\nStory"
   puts "-----"
   puts "Information not found" if information[:story].nil? || information[:story].empty?
-  information[:story].to_a.each_with_index do |story, index|
+  stories = information[:story].inject([]){ |s,x| !s.empty? && x.length > 20 ? (s.last << x) : s.push(x); s }
+  stories.to_a.each_with_index do |story, index|
     puts "#{(index+1).to_s.rjust(4)}. FRAGMENT\n #{story}"
   end
   puts "-"*80

@@ -238,8 +238,6 @@ describe JCore::Token do
     
     before do
       @token = JCore::Token.new("<modify-doc at='1'>")
-      puts @token
-      puts @token.token
     end
     
     it 'should be token' do

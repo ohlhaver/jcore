@@ -11,7 +11,11 @@ the Web site which uses the same template.
 Requirements
 ------------
 - Ruby 1.8.6
-- Gems: rspec (1.2.6) [required for specs]
+- rspec (1.2.6) [required for specs]
+- hpricot
+- ruby-stemmer [required for keywords, has a c extension]
+- htmlentities [required for keywords and cleaner]
+- multibyte [required for processing utf8 strings]
 
 Specs
 -----
