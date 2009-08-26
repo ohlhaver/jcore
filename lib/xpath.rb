@@ -55,10 +55,6 @@ module JCore
       return result
     end
     
-    def operation?(text)
-      text.match(/op\(/)
-    end
-    
     protected
     
     def whitespace?( text )

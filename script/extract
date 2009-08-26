@@ -1,11 +1,12 @@
 #!/usr/bin/env ruby
 require File.join(File.dirname(__FILE__), '../jcore')
+require File.join(File.dirname(__FILE__), '../lib/keyword')
 require 'pp'
 require 'optparse'
 require 'open-uri'
 require 'iconv'
 
-options = { :optimize => true }
+options = { :optimize => true , :language => 'en' }
 
 OptionParser.new do |opts|
   opts.banner = "Usage:\n    ruby #{$0} -s source -u url1,url2,url3.."
@@ -17,6 +18,9 @@ OptionParser.new do |opts|
   end
   opts.on("-s", "--source s", String, "Source name [Required]") do |s|
     options[:source] = s
+  end
+  opts.on("-l", "--language l", String, "Language of content [Default: en]") do |l|
+    options[:language] = l
   end
   opts.on("-o", "Turn off template optimization") do |m|
     options[:optimize] = false
@@ -58,5 +62,8 @@ options[:urls].each_with_index do |url, index|
   stories.to_a.each_with_index do |story, index|
     puts "#{(index+1).to_s.rjust(4)}. FRAGMENT\n #{story}"
   end
+  keywords = JCore::Keyword.keywords( JCore::Clean.story( stories.join(' ') ), options[:language] )
+  puts "\nKeywords"
+  puts keywords.join(', ')
   puts "-"*80
 end
