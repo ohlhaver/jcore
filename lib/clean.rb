@@ -90,13 +90,13 @@ module JCore
         results.size > 1 ? results : results.first
       end
       
-      def story( text )
+      def story( text, langauge = 'en' )
         text = pre_process( text, :strip_tags => true )
         text.gsub!(/\s+/m, ' ')
         return text
       end
       
-      def headline( text )
+      def headline( text, language = 'en' )
         text = pre_process( text, :strip_tags => true )
         text.gsub!(/\s+/m, ' ')
         return text
