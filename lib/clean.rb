@@ -93,12 +93,14 @@ module JCore
       def story( text, langauge = 'en' )
         text = pre_process( text, :strip_tags => true )
         text.gsub!(/\s+/m, ' ')
+        text.strip!
         return text
       end
       
       def headline( text, language = 'en' )
         text = pre_process( text, :strip_tags => true )
         text.gsub!(/\s+/m, ' ')
+        text.strip!
         return text
       end
       
