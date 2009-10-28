@@ -37,7 +37,7 @@ Gem::Specification.new do |s|
   s.summary = %q{JCore is web data extraction library.}
   
   dependencies = { 
-    'hpricot' => '>= 0.6', 
+    'hpricot' => '= 0.6.164', 
     'htmlentities' => '>= 4.1.0', 
     'multibyte' => '>=0.1.1',
     'ruby-stemmer' => '>=0.5.3'

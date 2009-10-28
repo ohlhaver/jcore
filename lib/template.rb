@@ -19,7 +19,7 @@ module JCore
       @source = source
       @modifiers = Array.new
       @fields = fields.collect{ |x| x.to_sym }
-      fields.each do |field|
+      @fields.each do |field|
         self[field] = Pattern.new
         @xpath[field] = Array.new
       end
