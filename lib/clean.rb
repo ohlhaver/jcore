@@ -105,10 +105,11 @@ module JCore
       end
       
       def image( text, url = nil )
-        h = Hpricot(text.to_s)
-        img_url = ( h.root.attributes['src'] || h.root.attributes['href'] )
+        doc = Hpricot(text.to_s)
+        img = doc.root rescue nil
+        img_url = img ? ( img.attributes['src'] || img.attributes['href'] ) : nil
         unless img_url
-          img = (h/"img:first").first
+          img = ( doc/"img:first" ).first
           img_url = img ? img.attributes['src'] : nil
         end
         return nil if img_url.nil? || img_url.empty?
