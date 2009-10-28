@@ -113,8 +113,8 @@ module JCore
           img_url = img ? img.attributes['src'] : nil
         end
         return nil if img_url.nil? || img_url.empty?
-        img_url = URI.parse(img_url)
-        img_url = URI.parse(url) + img_url if url&& img_url.relative?
+        img_url = URI.parse( URI.encode(img_url) )
+        img_url = URI.parse( URI.encode(url) ) + img_url if url&& img_url.relative?
         return img_url.to_s
       end
       
