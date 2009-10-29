@@ -127,7 +127,7 @@ module JCore
     def apply( doc )
       hdoc = Hpricot(doc)
       elem = hdoc.at(at)
-      return nil unless elem
+      return doc unless elem
       text = elem.to_s
       hdoc.to_s.gsub( text, modified_text( text ) )
     end
