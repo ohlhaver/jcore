@@ -49,13 +49,27 @@ module JCore
       result = data.select{ |x| !x.nil? } # remove items which are nil
       result = result.select{ |x| x.send(selection) } if selection # Do the selection based on some criteria text? elem? etc.
       result = result.collect{ |x| x.send( convert ) }  # Do the converstion to text using to_s/inner_html/inner_text
-      result.collect!{ |x| x.match(/#{options[:match]}/m).to_s } if options[:match] # Do the matching to subselect the result
+      if options[:match]
+        match_str, index = get_match_str_and_index( options[:match] )
+        result.collect!{ |x| match_reduce( x, match_str, index ) }
+      end
       result = result.select{ |x| !whitespace?(x) } # Remove the whitespace from the results
       result = result.first if result.size < 2 # Return the first element if result set contains less than 2 elementss
       return result
     end
     
     protected
+    
+    def get_match_str_and_index( match_str )
+      index = match_str.match(/\s+\$(\d+)\z/m)
+      index = index ? index[1].to_i : 0
+      [ match_str.gsub(/\s+\$(\d+)\z/m, ''), index ]
+    end
+    
+    def match_reduce( text, match_str, index )
+      match = text.match(/#{match_str}/mi)
+      ( match ? match[index].to_s.strip : "" ) rescue ""
+    end
     
     def whitespace?( text )
       text ? text.match(/\A\s*\z/) : nil
