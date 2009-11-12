@@ -3,6 +3,23 @@ require 'hpricot'
 require 'htmlentities'
 require 'multibyte'
 
+module URI
+  
+  # Fixes a bug with extensions
+  def self.encode_with_extensions( url_string )
+    encoded_url = encode_without_extensions( url_string )
+    encoded_url.gsub!( '[', '%5B' )
+    encoded_url.gsub!( ']', '%5D' )
+    encoded_url
+  end
+  
+  class << self
+    alias_method :encode_without_extensions, :encode
+    alias_method :encode, :encode_with_extensions
+  end
+  
+end
+
 module JCore
   
   module Clean
