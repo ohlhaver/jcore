@@ -7,6 +7,50 @@ module JCore
   # JCore::Tags module 
   module Keyword
     
+    class Collection < Array
+      
+      attr_accessor :index
+      attr_accessor :ranks
+      attr_accessor :selected_ranks
+      
+      protected :index, :index=, :ranks, :ranks=, :selected_ranks, :selected_ranks=
+      
+      def initialize( words )
+        self.index = {}
+        self.ranks = []
+        self.selected_ranks = []
+        unique_words = []
+        words.each{ |x| 
+          index[ x ] ||= unique_words.size
+          unique_words[ index[ x ] ] = x  
+          ranks[ index[ x ] ] ||= 0 
+          ranks[ index[ x ] ] += 1  
+        }
+        words.first(40).each{ |x| 
+          selected_ranks[ index[x] ] ||= 0
+          selected_ranks[ index[x] ] += 1
+        }
+        super( unique_words )
+      end
+      
+      def rank( keyword, selected = false )
+        selected ? selected_ranks[ index[keyword ] ] : ranks[ index[ keyword ] ]
+      end
+      
+      def all
+        self.sort_by{ |x| -ranks[ index[x] ] }
+      end
+      
+      def selected
+        self.select{ |x| selected_ranks[ index[x] ] }.sort_by{ |x| -selected_ranks[ index[x] ] }
+      end
+      
+      def inspect
+        "<JCore::Keyword::Collection keywords=#{super}>"
+      end
+      
+    end
+    
     KEYWORD_STOPWORDS = {}
     #
     # LOADING KEYWORD STOP WORDS
@@ -19,6 +63,20 @@ module JCore
     end
     
     class << self
+      
+      def collection( text, language='en' )
+        stemmer = Lingua::Stemmer.new(:language =>  language, :encoding => 'UTF_8')
+        text.downcase! # downcase all letters
+        text = JCore::Clean.ascii( text ) # convert to ascii
+        text = JCore::Clean.remove_punctuation( text ) # remove punctuation
+        text.gsub!(/\s+/m, ' ') # remove whitespace
+        text.gsub!(/\d+/, '') # remove digits
+        text.strip!
+        words = text.split(' ').collect{ |word| stemmer.stem(word) } # stem words
+        words = words - KEYWORD_STOPWORDS[language].to_a # remove stop words
+        Collection.new( words )
+      end
+      
       #
       # assumes the text is already preprocessed i.e. story information has already
       # extracted and cleaned. so we can directly just convert the text to ascii
