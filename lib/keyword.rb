@@ -15,7 +15,7 @@ module JCore
       
       protected :index, :index=, :ranks, :ranks=, :selected_ranks, :selected_ranks=
       
-      def initialize( words )
+      def initialize( words, selected_words = nil )
         self.index = {}
         self.ranks = []
         self.selected_ranks = []
@@ -26,7 +26,8 @@ module JCore
           ranks[ index[ x ] ] ||= 0 
           ranks[ index[ x ] ] += 1  
         }
-        words.first(40).each{ |x| 
+        selected_words ||= words.first(20)
+        selected_words.each{ |x| 
           selected_ranks[ index[x] ] ||= 0
           selected_ranks[ index[x] ] += 1
         }
@@ -73,8 +74,9 @@ module JCore
         text.gsub!(/\d+/, '') # remove digits
         text.strip!
         words = text.split(' ').collect{ |word| stemmer.stem(word) } # stem words
+        selected_words = words.first(40) - KEYWORD_STOPWORDS[language].to_a # remove stop words
         words = words - KEYWORD_STOPWORDS[language].to_a # remove stop words
-        Collection.new( words )
+        Collection.new( words, selected_words )
       end
       
       #
