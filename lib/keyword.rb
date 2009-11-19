@@ -65,6 +65,33 @@ module JCore
     
     class << self
       
+      #
+      # Returns words in the article represented by the stems in same order
+      # stems array is destructed according to stems found
+      #
+      def words( text, stems=[], language='en')
+        stemmer = Lingua::Stemmer.new(:language =>  language, :encoding => 'UTF_8')
+        stems_original = Array( stems )
+        stems = stems_original.dup
+        return [] if stems.empty?
+        text.downcase!
+        text = JCore::Clean.ascii( text ) # convert to ascii
+        text = JCore::Clean.remove_punctuation( text ) # remove punctuation
+        text.gsub!(/\s+/m, ' ') # remove whitespace
+        text.gsub!(/\d+/, '') # remove digits
+        text.strip!
+        words = text.split(' ').select{ |word| !stems.empty? && stems.delete( stemmer.stem( word ) ) }
+        stems_found = []
+        words = words.sort_by{ |word| 
+          stemmed_word = stemmer.stem( word )
+          stems_found << stemmed_word
+          stems_original.index( stemmed_word ) }
+        stems_original.delete_if{ |x| stems_found.include?( x ) }
+        return words
+      end
+      #
+      # Collection set of keywords for ( Selected and All Keywords with Frequency )
+      #
       def collection( text, language='en' )
         stemmer = Lingua::Stemmer.new(:language =>  language, :encoding => 'UTF_8')
         text.downcase! # downcase all letters
@@ -78,7 +105,6 @@ module JCore
         words = words - KEYWORD_STOPWORDS[language].to_a # remove stop words
         Collection.new( words, selected_words )
       end
-      
       #
       # assumes the text is already preprocessed i.e. story information has already
       # extracted and cleaned. so we can directly just convert the text to ascii
