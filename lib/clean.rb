@@ -94,6 +94,10 @@ module JCore
         return text
       end 
       
+      def agency?( text )
+        AUTHOR_AGENCIES.include?( text.upcase )
+      end
+      
       def author( text, language = 'en' )
         text = pre_process( text, :strip_tags => true )
         text.gsub!(/\(|\)|\]|\[|\}|\}/, ', ')  # removing parenthesis
@@ -103,7 +107,7 @@ module JCore
         (AUTHOR_STOP_WORDS[language] || []).each{ |stop_word| text.gsub!(/#{stop_word}/i, ' ') }
         AUTHOR_SEPARATOR_WORDS.each{ |word| text.gsub!(/\s+#{word}\s+/i, ', ') }
         text.strip!              #remove trailing spaces
-        results = text.split(AUTHOR_SEPARATORS).collect{|x| x.gsub(AUTHOR_PUNCTUATIONS, ' ').strip.gsub(/\s+/, ' ') }.select{ |x| !x.empty? && !AUTHOR_AGENCIES.include?(x.upcase) }
+        results = text.split( AUTHOR_SEPARATORS ).collect{|x| x.gsub( AUTHOR_PUNCTUATIONS, ' ').strip.gsub(/\s+/, ' ') }.select{ |x| !x.empty?  }
         results.size > 1 ? results : results.first
       end
       
