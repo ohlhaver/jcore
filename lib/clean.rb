@@ -25,7 +25,7 @@ module JCore
   module Clean
     
     AUTHOR_STOP_WORDS = {}
-    AUTHOR_SEPARATOR_WORDS = [ 'and', 'und', 'n' ]
+    AUTHOR_SEPARATOR_WORDS = [ 'and', 'und' ]
     AUTHOR_SEPARATORS = /[,\/&\|]/
     AUTHOR_PUNCTUATIONS = /[\.\:\-\+]/
     ALL_PUNCTUATIONS = /[\@\!\"\#\$\%\&\^\'\(\)\{\}\[\]\;\:\<\>\.\,\|\?\/\\\+\=\_\-\*\~\`]/
@@ -102,9 +102,10 @@ module JCore
         text = pre_process( text, :strip_tags => true )
         text.gsub!(/\(|\)|\]|\[|\}|\}/, ', ')  # removing parenthesis
         text.gsub!(/\s+/m, ' ')                # remove white space
-        text.gsub!(/\d/, '')                   # remove the numbers
         text.strip!                            # remove trailing spaces
         (AUTHOR_STOP_WORDS[language] || []).each{ |stop_word| text.gsub!(/#{stop_word}/i, ' ') }
+        text.gsub!(/\d/, '')                   # remove the numbers
+        text.strip!                            # remove trailing spaces
         AUTHOR_SEPARATOR_WORDS.each{ |word| text.gsub!(/\s+#{word}\s+/i, ', ') }
         text.strip!              #remove trailing spaces
         results = text.split( AUTHOR_SEPARATORS ).collect{|x| x.gsub( AUTHOR_PUNCTUATIONS, ' ').strip.gsub(/\s+/, ' ') }.select{ |x| !x.empty?  }
