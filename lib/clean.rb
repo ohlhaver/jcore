@@ -101,7 +101,7 @@ module JCore
         text.gsub!(/\d/, '')                   # remove the numbers
         text.strip!                            # remove trailing spaces
         (AUTHOR_STOP_WORDS[language] || []).each{ |stop_word| text.gsub!(/#{stop_word}/i, ' ') }
-        AUTHOR_SEPARATOR_WORDS.each{ |word| text.gsub(/\s+#{word}\s+/i, ', ') }
+        AUTHOR_SEPARATOR_WORDS.each{ |word| text.gsub!(/\s+#{word}\s+/i, ', ') }
         text.strip!              #remove trailing spaces
         results = text.split(AUTHOR_SEPARATORS).collect{|x| x.gsub(AUTHOR_PUNCTUATIONS, ' ').strip.gsub(/\s+/, ' ') }.select{ |x| !x.empty? && !AUTHOR_AGENCIES.include?(x.upcase) }
         results.size > 1 ? results : results.first
