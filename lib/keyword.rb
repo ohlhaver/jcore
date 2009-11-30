@@ -89,10 +89,12 @@ module JCore
         stems_original.delete_if{ |x| stems_found.include?( x ) }
         return words
       end
+      
       #
-      # Collection set of keywords for ( Selected and All Keywords with Frequency )
+      # The ordered keywords sequence with duplicates
+      # This method modifies text
       #
-      def collection( text, language='en' )
+      def keywords_sequence!( text, language='en' )
         stemmer = Lingua::Stemmer.new(:language =>  language, :encoding => 'UTF_8')
         text.downcase! # downcase all letters
         text = JCore::Clean.ascii( text ) # convert to ascii
@@ -101,10 +103,32 @@ module JCore
         text.gsub!(/\d+/, '') # remove digits
         text.strip!
         words = text.split(' ').collect{ |word| stemmer.stem(word) } # stem words
-        selected_words = words.first(40) - KEYWORD_STOPWORDS[language].to_a # remove stop words
-        words = words - KEYWORD_STOPWORDS[language].to_a # remove stop words
+        words.delete_if{ |word| word.length < 3 }
+      end
+      
+      def selected_keywords_sequence( text, language='en' )
+        case( language ) when 'de' :
+          # Select only capitalized words from the text as selected keywords
+          text = text.split(/\s+/m).select{ |e| e.match(/[A-Z]/) }.join(' ')
+          keywords_sequence!( text, language )
+        else
+          nil
+        end
+      end
+      
+      #
+      # Collection set of keywords for ( Selected and All Keywords with Frequency )
+      #
+      def collection( text, language='en' )
+        selected_words = selected_keywords_sequence( text, language )
+        words = keywords_sequence!( text.dup, language )
+        selected_words =  ( selected_words ? selected_words : words ).first( 40 )
+        stopwords = KEYWORD_STOPWORDS[language].to_a
+        selected_words.delete_if{ |word| stopwords.include?( word ) }
+        words.delete_if{ |word| stopwords.include?( word ) }
         Collection.new( words, selected_words )
       end
+      
       #
       # assumes the text is already preprocessed i.e. story information has already
       # extracted and cleaned. so we can directly just convert the text to ascii
@@ -112,14 +136,7 @@ module JCore
       # the stop words
       #
       def keywords(text, language='en')
-        stemmer = Lingua::Stemmer.new(:language =>  language, :encoding => 'UTF_8')
-        text.downcase! # downcase all letters
-        text = JCore::Clean.ascii( text ) # convert to ascii
-        text = JCore::Clean.remove_punctuation( text ) # remove punctuation
-        text.gsub!(/\s+/m, ' ') # remove whitespace
-        text.gsub!(/\d+/, '') # remove digits
-        text.strip!
-        words = text.split(' ').collect{ |word| stemmer.stem(word) } # stem words
+        words = keywords_sequence( text.dup, language )
         words.uniq! # remove duplicates
         words - KEYWORD_STOPWORDS[language].to_a # remove stop words
       end
