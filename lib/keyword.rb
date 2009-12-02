@@ -107,19 +107,20 @@ module JCore
       end
       
       def selected_keywords_sequence( text, language='en' )
-        case( language ) when 'de' :
-          # Select only capitalized words from the text as selected keywords
-          text = text.split(/\s+/m).select{ |e| e.match(/[A-Z]/) }.join(' ')
-          keywords_sequence!( text, language )
-        else
-          nil
-        end
+        # case( language ) when 'de' :
+        # # Select only capitalized words from the text as selected keywords
+        text = text.split(/\s+/m).select{ |e| e.match(/[A-Z]/) }.join(' ')
+        keywords_sequence!( text, language )
+        # else
+        #   nil
+        # end
       end
       
       #
       # Collection set of keywords for ( Selected and All Keywords with Frequency )
       #
       def collection( text, language='en' )
+        text = text.to_s unless text.is_a?( String )
         selected_words = selected_keywords_sequence( text, language )
         words = keywords_sequence!( text.dup, language )
         selected_words =  ( selected_words ? selected_words : words ).first( 40 )
