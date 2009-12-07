@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'hpricot'
+require 'htmlentities'
 # begin
 # require 'ruby-debug'
 # rescue StandardError
@@ -49,6 +50,7 @@ module JCore
           extract_information( tokenizer, template, information )
           tokenizer.reset
         end
+        data = HTMLEntities.decode( data ) # decoding html entities
         doc = Hpricot( data )
         templates.each do |template|
           extract_xpath_information( doc, template, information )
