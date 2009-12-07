@@ -73,6 +73,29 @@ module JCore
         return text
       end
       
+      
+      # for (i=0; i < length; i++) { 
+      #                if (bytes[i] < 0x80) putchar(bytes[i]); 
+      #                else if (bytes[i] < 0xC0) { 
+      #                   putchar('\xC2'); 
+      #                   putchar(bytes[i]); 
+      #                }
+      #                else {
+      #                   putchar('\xC3'); 
+      #                   putchar(bytes[i] - 64); 
+      #                }
+      #             }
+      
+      def iso2utf8( text )
+        chars = text.unpack('C*')
+        chars.collect!{ |x| 
+          if x < 0x80 then x
+          elsif x < 0xC0 then [ 0xC2, x ]
+          else [ 0xC3, x - 64 ] end
+        }.flatten!
+        chars.pack('U*')
+      end
+      
       # assumes it gets pre_process( text )
       def ascii( text )
         chars = text.unpack('U*')
@@ -90,16 +113,17 @@ module JCore
       
       #
       def remove_punctuation( text )
+        text = text.chars
         text.gsub!(ALL_PUNCTUATIONS, ' ')
-        return text
+        return text.to_s
       end 
       
       def agency?( text )
-        AUTHOR_AGENCIES.include?( text.upcase )
+        AUTHOR_AGENCIES.include?( text.chars.upcase.to_s )
       end
       
       def author( text, language = 'en' )
-        text = pre_process( text, :strip_tags => true )
+        text = pre_process( text, :strip_tags => true ).chars
         text.gsub!(/\(|\)|\]|\[|\}|\}/, ', ')  # removing parenthesis
         text.gsub!(/\s+/m, ' ')                # remove white space
         text.strip!                            # remove trailing spaces
@@ -113,17 +137,17 @@ module JCore
       end
       
       def story( text, langauge = 'en' )
-        text = pre_process( text, :strip_tags => true )
+        text = pre_process( text, :strip_tags => true ).chars
         text.gsub!(/\s+/m, ' ')
         text.strip!
-        return text
+        return text.to_s
       end
       
       def headline( text, language = 'en' )
-        text = pre_process( text, :strip_tags => true )
+        text = pre_process( text, :strip_tags => true ).chars
         text.gsub!(/\s+/m, ' ')
         text.strip!
-        return text
+        return text.to_s
       end
       
       def image( text, url = nil )

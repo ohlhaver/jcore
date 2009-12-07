@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{jcore}
-  s.version = "1.0.9"
+  s.version = "1.1.0"
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Ram Singla"]
   s.date = %q{2009-08-31}
@@ -27,7 +27,9 @@ Gem::Specification.new do |s|
     "lib/clean/EN.STOPWORDS",
     "lib/clean/DE.STOPWORDS",
     "lib/keywords/EN.STOPWORDS",
-    "lib/keywords/DE.STOPWORDS" 
+    "lib/keywords/DE.STOPWORDS",
+    "lib/keywords/EN.STOPWORDS.ALL",
+    "lib/keywords/DE.STOPWORDS.ALL"
   ]
   s.has_rdoc = true
   s.homepage = %q{https://github.com/ohlhaver/jcore}

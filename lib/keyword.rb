@@ -60,7 +60,7 @@ module JCore
       language = File.basename(file)[0, 2].downcase
       KEYWORD_STOPWORDS[language] = File.open(file).read.split(/(\n|\r)+/m).collect do |word|
         word.strip
-      end.select{ |word| !word.empty? }.uniq
+      end.select{ |word| !word.empty? && word.length > 2 }.uniq
     end
     
     class << self
@@ -95,14 +95,16 @@ module JCore
       # This method modifies text
       #
       def keywords_sequence!( text, language='en' )
-        stemmer = Lingua::Stemmer.new(:language =>  language, :encoding => 'UTF_8')
+        #stemmer = Lingua::Stemmer.new(:language =>  language, :encoding => 'UTF_8')
         text.downcase! # downcase all letters
-        text = JCore::Clean.ascii( text ) # convert to ascii
+        #text = JCore::Clean.ascii( text ) # convert to ascii
         text = JCore::Clean.remove_punctuation( text ) # remove punctuation
         text.gsub!(/\s+/m, ' ') # remove whitespace
         text.gsub!(/\d+/, '') # remove digits
         text.strip!
-        words = text.split(' ').collect{ |word| stemmer.stem(word) } # stem words
+        text.downcase!
+        #words = text.split(' ').collect{ |word| stemmer.stem(word) } # stem words
+        words = text.split(' ')
         words.delete_if{ |word| word.length < 3 }
       end
       
@@ -137,7 +139,7 @@ module JCore
       # the stop words
       #
       def keywords(text, language='en')
-        words = keywords_sequence( text.dup, language )
+        words = keywords_sequence!( text.dup, language )
         words.uniq! # remove duplicates
         words - KEYWORD_STOPWORDS[language].to_a # remove stop words
       end
