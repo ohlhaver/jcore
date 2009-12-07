@@ -56,10 +56,10 @@ module JCore
     #
     # LOADING KEYWORD STOP WORDS
     #
-    Dir[ File.join( File.dirname(__FILE__), 'keywords/??.STOPWORDS' ) ].each do | file |
+    Dir[ File.join( File.dirname(__FILE__), 'keywords/??.STOPWORDS.ALL' ) ].each do | file |
       language = File.basename(file)[0, 2].downcase
       KEYWORD_STOPWORDS[language] = File.open(file).read.split(/(\n|\r)+/m).collect do |word|
-        word.strip.chars.normalize(:kd)
+        word.strip.chars.normalize(:kd).to_s
       end.select{ |word| !word.empty? && word.length > 2 }.uniq
     end
     
@@ -102,20 +102,14 @@ module JCore
         text.gsub!(/\s+/m, ' ') # remove whitespace
         text.gsub!(/\d+/, '') # remove digits
         text.strip!
-        text.downcase!
         #words = text.split(' ').collect{ |word| stemmer.stem(word) } # stem words
-        words = text.split(' ')
+        words = text.split(' ').collect{ |w| w.to_s }
         words.delete_if{ |word| word.length < 3 }
       end
       
       def selected_keywords_sequence( text, language='en' )
-        # case( language ) when 'de' :
-        # # Select only capitalized words from the text as selected keywords
         text = text.split(/\s+/m).select{ |e| e.match(/[A-Z]/) }.join(' ')
         keywords_sequence!( text, language )
-        # else
-        #   nil
-        # end
       end
       
       #
@@ -123,8 +117,9 @@ module JCore
       #
       def collection( text, language='en' )
         text = text.to_s unless text.is_a?( String )
+        text = text.chars.normalize(:kd)
         selected_words = selected_keywords_sequence( text, language )
-        words = keywords_sequence!( text.dup, language )
+        words = keywords_sequence!( text, language )
         selected_words =  ( selected_words ? selected_words : words ).first( 40 )
         stopwords = KEYWORD_STOPWORDS[language].to_a
         selected_words.delete_if{ |word| stopwords.include?( word ) }
@@ -139,7 +134,7 @@ module JCore
       # the stop words
       #
       def keywords(text, language='en')
-        words = keywords_sequence!( text.dup, language )
+        words = keywords_sequence!( text.chars.normalize(:kd), language )
         words.uniq! # remove duplicates
         words - KEYWORD_STOPWORDS[language].to_a # remove stop words
       end
