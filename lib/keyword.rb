@@ -59,7 +59,7 @@ module JCore
     Dir[ File.join( File.dirname(__FILE__), 'keywords/??.STOPWORDS' ) ].each do | file |
       language = File.basename(file)[0, 2].downcase
       KEYWORD_STOPWORDS[language] = File.open(file).read.split(/(\n|\r)+/m).collect do |word|
-        word.strip
+        word.strip.chars.normalize(:kd)
       end.select{ |word| !word.empty? && word.length > 2 }.uniq
     end
     
