@@ -28,6 +28,10 @@ module JCore
         }
         selected_words ||= words.first(20)
         selected_words.each{ |x| 
+          index[ x ] ||= unique_words.size
+          unique_words[ index[x] ] ||= x
+        }
+        selected_words.each{ |x| 
           selected_ranks[ index[x] ] ||= 0
           selected_ranks[ index[x] ] += 1
         }
@@ -108,7 +112,7 @@ module JCore
       end
       
       def selected_keywords_sequence( text, language='en' )
-        text = text.split(/\s+/m).select{ |e| e.match(/[A-Z]/) }.join(' ')
+        text = text.split(/\s+/m).select{ |e| e.match(/[A-Z]/) }.join(' ').chars.normalize(:kd)
         keywords_sequence!( text, language )
       end
       
