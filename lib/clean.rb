@@ -28,7 +28,7 @@ module JCore
     AUTHOR_SEPARATOR_WORDS = [ 'and', 'und' ]
     AUTHOR_SEPARATORS = /[,\/&\|]/
     AUTHOR_PUNCTUATIONS = /[\.\:\-\+]/
-    ALL_PUNCTUATIONS = /[\@\!\"\#\$\%\&\^\'\(\)\{\}\[\]\;\:\<\>\.\,\|\?\/\\\+\=\_\-\*\~\`]/
+    ALL_PUNCTUATIONS = /[\@\!\"\#\$\%\&\^\'\(\)\{\}\[\]\;\:\<\>\.\,\|\?\/\\\+\=\_\-\*\~\`\´\`\‘\’\“\”\„\«\»\…\¿\¡\®\™\©]/
     
     HE_CODER = HTMLEntities.new
     #
@@ -116,7 +116,7 @@ module JCore
         text = text.chars
         text.gsub!(ALL_PUNCTUATIONS, ' ')
         return text.to_s
-      end 
+      end
       
       def agency?( text )
         AUTHOR_AGENCIES.include?( text.chars.upcase.to_s )
