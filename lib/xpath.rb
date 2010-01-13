@@ -125,20 +125,20 @@ module JCore
     end
     
     def apply( doc )
-      hdoc = Hpricot(doc)
-      elem = hdoc.at(at)
+      hdoc = Hpricot( doc )
+      elem = hdoc.at( at )
       return doc unless elem
-      text = elem.to_s
-      hdoc.to_s.gsub( text, modified_text( text ) )
+      modify_elem( elem )
+      hdoc.output( "", :preserve => true )
     end
     
     protected
     
-    def modified_text( text )
-      case action when 'insert_before' : "#{@text}#{text}" 
-      when 'insert_after' : "#{text}#{@text}"
-      when 'replace' :  @text.to_s
-      when 'delete' : '' end
+    def modified_text( elem )
+      case action when 'insert_before' : elem.before( @text )
+      when 'insert_after' : elem.after( @text )
+      when 'replace' :  elem.swap( @text )
+      when 'delete' : elem.swap("") end
     end
     
   end

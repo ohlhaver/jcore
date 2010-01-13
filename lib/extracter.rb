@@ -50,6 +50,7 @@ module JCore
           extract_information( tokenizer, template, information )
           tokenizer.reset
         end
+        data = Hpricot( data ).to_s # for safety ( corrects incorrect html )
         data = HTMLEntities.new.decode( data ) # decoding html entities
         doc = Hpricot( data )
         templates.each do |template|
