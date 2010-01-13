@@ -134,7 +134,7 @@ module JCore
     
     protected
     
-    def modified_text( elem )
+    def modify_elem( elem )
       case action when 'insert_before' : elem.before( @text )
       when 'insert_after' : elem.after( @text )
       when 'replace' :  elem.swap( @text )
