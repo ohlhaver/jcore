@@ -1,6 +1,8 @@
 require 'rubygems'
 require 'hpricot'
 require 'htmlentities'
+# We do not want to unescape these entities
+HTMLEntities::MAPPINGS['xhtml1'].delete_if{ |k,v| [ 'gt', 'amp', 'lt', 'quot', 'apos' ].include?(k) }
 # begin
 # require 'ruby-debug'
 # rescue StandardError
@@ -50,7 +52,7 @@ module JCore
           extract_information( tokenizer, template, information )
           tokenizer.reset
         end
-        data = Hpricot( data ).to_s # for safety ( corrects incorrect html )
+        #data = Hpricot( data ).to_s # for safety ( corrects incorrect html )
         data = HTMLEntities.new.decode( data ) # decoding html entities
         doc = Hpricot( data )
         templates.each do |template|
