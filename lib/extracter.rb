@@ -1,6 +1,8 @@
 require 'rubygems'
 require 'hpricot'
 require 'htmlentities'
+# Long Attributes can be parsed correctly
+Hpricot.buffer_size = 262144 # 256 KB
 # We do not want to unescape these entities
 HTMLEntities::MAPPINGS['xhtml1'].delete_if{ |k,v| [ 'gt', 'amp', 'lt', 'quot', 'apos' ].include?(k) }
 # begin
@@ -53,7 +55,7 @@ module JCore
           tokenizer.reset
         end
         #data = Hpricot( data ).to_s # for safety ( corrects incorrect html )
-        data = HTMLEntities.new.decode( data ) # decoding html entities
+        data = HTMLEntities.new.decode( data ) # decoding html entities 
         doc = Hpricot( data )
         templates.each do |template|
           extract_xpath_information( doc, template, information )
