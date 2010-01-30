@@ -29,6 +29,7 @@ module JCore
     AUTHOR_SEPARATORS = /[,\/&\|]/
     AUTHOR_PUNCTUATIONS = /[\.\:\-\+]/
     ALL_PUNCTUATIONS = /[\@\!\"\#\$\%\&\^\'\(\)\{\}\[\]\;\:\<\>\.\,\|\?\/\\\+\=\_\-\*\~\`\´\`\‘\’\“\”\„\«\»\…\¿\¡\®\™\©]/
+    NAMED_PUNCTUATIONS = Regexp.new( "[#{HTMLEntities::MAPPINGS['xhtml1'].values.select{|x| x > 255 }.pack('U*')}]" )
     
     HE_CODER = HTMLEntities.new
     #
@@ -115,6 +116,7 @@ module JCore
       def remove_punctuation( text )
         text = text.chars
         text.gsub!(ALL_PUNCTUATIONS, ' ')
+        text.gsub!(NAMED_PUNCTUATIONS, ' ')
         return text.to_s
       end
       

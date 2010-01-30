@@ -108,7 +108,7 @@ module JCore
         text.strip!
         #words = text.split(' ').collect{ |word| stemmer.stem(word) } # stem words
         words = text.split(' ').collect{ |w| w.to_s }
-        words.delete_if{ |word| word.length < 3 }
+        words.delete_if{ |word| word.chars.length < 3 }
       end
       
       def selected_keywords_sequence( text, language='en' )
