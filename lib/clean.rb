@@ -146,7 +146,7 @@ module JCore
       def author( text, language = 'en' )
         text = pre_process( text, :strip_tags => true ).chars
         text.gsub!( RFC822::EmailRegex, '') # removing emails
-        text.gsub!(/\(|\)|\]|\[|\}|\}/, ', ')  # removing parenthesis
+        text.gsub!(/\(|\)|\]|\[|\}|\}|\>|\</, ', ')  # removing parenthesis
         text.gsub!(/\s+/m, ' ')                # remove white space
         text.strip!                            # remove trailing spaces
         (AUTHOR_STOP_WORDS[language] || []).each{ |stop_word| text.gsub!(/#{stop_word}/i, ' ') }
