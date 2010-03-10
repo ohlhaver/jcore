@@ -134,7 +134,7 @@ module JCore
         text.strip!                            # remove trailing spaces
         AUTHOR_SEPARATOR_WORDS.each{ |word| text.gsub!(/\s+#{word}\s+/i, ', ') }
         text.strip!              #remove trailing spaces
-        results = text.split( AUTHOR_SEPARATORS ).collect{|x| x.gsub( AUTHOR_PUNCTUATIONS, ' ').strip.gsub(/\s+/, ' ') }.select{ |x| !x.empty?  }
+        results = text.split( AUTHOR_SEPARATORS ).collect{|x| x.gsub( AUTHOR_PUNCTUATIONS, ' ').strip.gsub(/\s+/, ' ').to_s }.select{ |x| !x.empty?  }
         results.size > 1 ? results : results.first
       end
       
