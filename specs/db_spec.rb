@@ -46,6 +46,10 @@ describe JCore::Story do
       :author_names => [ 'Voo' ]
     )
   end
+  
+  after(:each) do
+    JCore::Story.delete_all
+  end
 
   it "should validate presence of title, url, source_name, feed_url, language_code and created_at" do
     story = JCore::Story.new
@@ -53,6 +57,12 @@ describe JCore::Story do
     [ :title, :url, :source_name, :feed_url, :language_code, :created_at ].each do |attribute|
       story.errors.on(attribute).should_not be_nil
     end
+  end
+  
+  it "should store valid story" do
+    story = JCore::Story.create( @valid_story )
+    story.should_not be_new_record
+    story.author_names.should be_include( 'Foo' )
   end
   
   it "should not store stories without author" do
@@ -85,7 +95,6 @@ describe JCore::Story do
   end
   
   it "should provide \"each_new_story\" method to iterate over all unread stories" do
-    JCore::Story.delete_all
     JCore::Story.transaction do
       20.times do |t|
         JCore::Story.create( @valid_story.merge( :title => "Title #{t}", :url => "Url #{t}" ) )
