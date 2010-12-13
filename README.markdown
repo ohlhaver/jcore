@@ -16,6 +16,7 @@ Requirements
 - ruby-stemmer [required for keywords, has a c extension]
 - htmlentities [required for keywords and cleaner]
 - multibyte [required for processing utf8 strings]
+- activerecord [required for JCore::Story Database Plugin]
 
 Specs
 -----
