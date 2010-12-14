@@ -111,7 +111,7 @@ module JCore
     end
     
     def image=( image_hash )
-      self.image_url = image_hash[:url]
+      self.image_url = image_hash[:download_url]
       self.image_height = image_hash[:height]
       self.image_width = image_hash[:width]
       self.image_type = image_hash[:content_type]
@@ -122,6 +122,7 @@ module JCore
     def duplicate_title_check
       self.title_checksum = self.title.mb_chars.downcase.gsub(/\s+/,'_').gsub(/\W+/,'').to_s
       errors.add( 'title', :already_exists ) if JCore::Story.exists?( { :title_checksum => self.title_checksum } )
+      return errors.blank?
     end
     
     def duplicate_url_check
@@ -129,6 +130,7 @@ module JCore
       errors.add( 'url', :already_exists ) if JCore::Story.exists?( { 
         :source_name => self.source_name, :url_checksum => self.url_checksum 
       } )
+      return errors.blank?
     end
     
     def clean_author_name
@@ -145,6 +147,7 @@ module JCore
         JCore::BlacklistedAuthor.includes?( author )
       }
       errors.add( 'author_names', :blank ) if self.author_names.blank?
+      return errors.blank?
     end
     
   end

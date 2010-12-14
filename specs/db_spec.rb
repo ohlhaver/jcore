@@ -67,7 +67,7 @@ describe JCore::Story do
   
   it "should not store stories without author" do
     story = JCore::Story.new( @valid_story_without_author )
-    story.save
+    story.save.should be_false
     story.errors.on(:author_names).should_not be_nil
   end
   
@@ -75,7 +75,7 @@ describe JCore::Story do
     story = JCore::Story.create( @valid_story )
     story.should_not be_new_record
     story = JCore::Story.create( @duplicate_title_attrs )
-    story.save
+    story.save.should be_false
     story.errors.on(:title)
   end
   
@@ -83,14 +83,14 @@ describe JCore::Story do
     story = JCore::Story.create( @valid_story )
     story.should_not be_new_record
     story = JCore::Story.create( @duplicate_url_attrs )
-    story.save
+    story.save.should be_false
     story.errors.on(:title)
   end
   
   it "should remove authors which matches the blacklist experession" do
     JCore::BlacklistedAuthor.create( :keyword => 'Blah' )
     story = JCore::Story.new( @valid_story_with_junk_author )
-    story.save
+    story.save.should be_false
     story.errors.on(:author_names).should_not be_nil
   end
   
