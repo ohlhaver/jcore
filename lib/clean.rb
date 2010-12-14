@@ -3,6 +3,24 @@ require 'hpricot'
 require 'htmlentities'
 require 'multibyte'
 
+if RUBY_VERSION == "1.8.7"
+  
+  String.class_eval do
+    
+    def chars
+      Multibyte::Chars.new(self)
+    end
+
+    # Returns true if the string has UTF-8 semantics (a String used for purely byte resources is unlikely to have
+    # them), returns false otherwise.
+    def is_utf8?
+      Multibyte::Handlers::UTF8Handler.consumes?(self)
+    end
+    
+  end
+  
+end
+
 module URI
   
   # Fixes a bug with extensions
