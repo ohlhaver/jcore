@@ -1,3 +1,4 @@
+require File.join( File.dirname(__FILE__), '../clean.rb' )
 require 'activerecord'
 require 'digest/md5'
 # set $
