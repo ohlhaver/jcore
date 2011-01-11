@@ -1,7 +1,7 @@
 require File.join( File.dirname(__FILE__), '../clean.rb' )
 begin
 require 'activerecord'
-rescue
+rescue LoadError
 require 'active_record'
 end
 require 'digest/md5'
