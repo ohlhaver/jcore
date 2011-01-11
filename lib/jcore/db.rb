@@ -1,8 +1,12 @@
 require File.join( File.dirname(__FILE__), '../clean.rb' )
 begin
+# Rails2
 require 'activerecord'
+$scope_method = 'named_scope'
 rescue LoadError
+# Rails3
 require 'active_record'
+$scope_method = 'scope'
 end
 require 'digest/md5'
 # set $
@@ -75,7 +79,8 @@ module JCore
     self.set_table_name :stories
     serialize :author_names
     before_create :duplicate_title_check, :duplicate_url_check, :clean_author_name
-    named_scope :unread, { :conditions => { :unread => true } }
+    
+    self.send( $scope_method, :unread, { :conditions => { :unread => true } } )
     
     cattr_accessor :poll_frequency
     self.poll_frequency = 60
