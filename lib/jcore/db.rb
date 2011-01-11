@@ -1,5 +1,9 @@
 require File.join( File.dirname(__FILE__), '../clean.rb' )
+begin
 require 'activerecord'
+rescue
+require 'active_record'
+end
 require 'digest/md5'
 # set $
 #$jcore_db_config = YAML.load_file( File.join( RAILS_ROOT, '/config/jcore_story.yml' ) )
