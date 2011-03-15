@@ -14,8 +14,10 @@ require File.dirname(__FILE__) + '/../lib/jcore/db.rb'
 describe JCore::Story do
   
   before(:all) do
+    JCore::DB_002.down rescue
     JCore::DB.down rescue
     JCore::DB.up
+    JCore::DB_002.up
   end
   
   before(:each) do
@@ -63,6 +65,7 @@ describe JCore::Story do
     story = JCore::Story.create( @valid_story )
     story.should_not be_new_record
     story.author_names.should be_include( 'Foo' )
+    story.categories.should == []
   end
   
   it "should not store stories without author" do

@@ -48,7 +48,7 @@ module JCore
         t.string   :url_checksum, :limit => 40
         t.datetime :created_at
         t.index    :title_checksum, :name => 'story_titles_idx'
-        t.index    [ :source_name, :url_checksum ], :name => 'story_urls_idx' 
+        t.index    [ :source_name, :url_checksum ], :name => 'story_urls_idx'
         t.index    :unread, :name => 'unread_stories_idx'
       end
       create_table :blacklisted_authors do |t|
@@ -62,6 +62,22 @@ module JCore
       drop_table :blacklisted_authors
     end
     
+  end
+
+  class DB_002 < JCore::Migration
+    def self.up
+      add_column :stories, :video, :boolean, :default => false, :null => false
+      add_column :stories, :opinion, :boolean, :default => false, :null => false
+      add_column :stories, :content, :text, :limit => 50_000
+      add_column :stories, :categories, :string, :limit => 2_000
+    end
+
+    def self.down
+      remove_column :stories, :video
+      remove_column :stories, :opinion
+      remove_column :stories, :content
+      remove_column :stories, :categories
+    end
   end
   
   class BlacklistedAuthor < JCore::Base
@@ -77,15 +93,20 @@ module JCore
   class Story < JCore::Base
     
     self.set_table_name :stories
-    serialize :author_names
-    before_create :duplicate_title_check, :duplicate_url_check, :clean_author_name
+
+    serialize :author_names, Array
+    serialize :categories, Array
+
+    before_create :duplicate_title_check, :duplicate_url_check, :clean_author_name, :clean_categories
     
     self.send( $scope_method, :unread, { :conditions => { :unread => true } } )
     
     cattr_accessor :poll_frequency
+
     self.poll_frequency = 60
     
     validates_presence_of :title, :source_name, :url, :feed_url, :language_code, :created_at
+    has_one :story_content, :dependent => :delete
     
     def mark_read
       update_attribute( :unread, false )
@@ -144,7 +165,7 @@ module JCore
     end
     
     def clean_author_name
-      self.author_names ||= Array( self.author_names )
+      self.author_names = Array( self.author_names )
       self.author_names = self.author_names.inject( [] ) do |authors, name|
         a_ns = Array( JCore::Clean.author( name ) )
         a_ns.each do |a_n|
@@ -159,6 +180,11 @@ module JCore
       errors.add( 'author_names', :blank ) if self.author_names.blank?
       return errors.blank?
     end
+
+    def clean_categories
+      self.categories = Array( self.categories )
+    end
     
   end
+
 end
