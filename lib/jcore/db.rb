@@ -170,7 +170,7 @@ module JCore
       self.author_names = self.author_names.inject( [] ) do |authors, name|
         a_ns = Array( JCore::Clean.author( name ) )
         a_ns.each do |a_n|
-           authors.push( a_n.mb_chars[0, 100] ) # author names are truncated at 100 chars
+           authors.push( a_n.mb_chars[0, 100].to_s ) # author names are truncated at 100 chars
         end
         authors
       end
