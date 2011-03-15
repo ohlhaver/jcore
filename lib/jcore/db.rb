@@ -142,10 +142,11 @@ module JCore
     end
     
     def image=( image_hash )
-      self.image_url = image_hash[:download_url]
-      self.image_height = image_hash[:height]
-      self.image_width = image_hash[:width]
-      self.image_type = image_hash[:content_type]
+      image_hash.stringify_keys! # stringify keys
+      self.image_url = image_hash['download_url']
+      self.image_height = image_hash['height']
+      self.image_width = image_hash['width']
+      self.image_type = image_hash['content_type']
     end
     
     protected
@@ -177,7 +178,7 @@ module JCore
       self.author_names.delete_if { |author|
         JCore::BlacklistedAuthor.includes?( author )
       }
-      errors.add( 'author_names', :blank ) if self.author_names.blank?
+      errors.add( 'author_names', :blank ) if self.author_names.blank? && self.language_code != 'de'
       return errors.blank?
     end
 

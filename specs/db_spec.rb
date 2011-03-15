@@ -74,6 +74,12 @@ describe JCore::Story do
     story.errors.on(:author_names).should_not be_nil
   end
   
+  it "should store stories without author only for german language" do
+    story = JCore::Story.new( @valid_story_without_author )
+    story.language_code = 'de'
+    story.save.should be_true
+  end
+
   it "should not store stories with duplicate title" do
     story = JCore::Story.create( @valid_story )
     story.should_not be_new_record
