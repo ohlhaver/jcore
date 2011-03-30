@@ -32,8 +32,10 @@ module URI
   end
   
   class << self
-    alias_method :encode_without_extensions, :encode
-    alias_method :encode, :encode_with_extensions
+    unless defined?( :encoded_without_extensions)
+      alias_method :encode_without_extensions, :encode
+      alias_method :encode, :encode_with_extensions
+    end
   end
   
 end
@@ -61,45 +63,46 @@ module JCore
   
   module Clean
     
-    AUTHOR_STOP_WORDS = {}
-    AUTHOR_SEPARATOR_WORDS = [ 'and', 'und' ]
-    AUTHOR_SEPARATORS = /[,\/&\|]/
-    AUTHOR_PUNCTUATIONS = /[\.\:\-\+]/
-    ALL_PUNCTUATIONS = /[\@\!\"\#\$\%\&\^\'\(\)\{\}\[\]\;\:\<\>\.\,\|\?\/\\\+\=\_\-\*\~\`\´\`\‘\’\“\”\„\«\»\…\¿\¡\®\™\©]/
-    NAMED_PUNCTUATIONS = Regexp.new( "[#{HTMLEntities::MAPPINGS['xhtml1'].values.select{|x| x > 255 }.pack('U*')}]" )
-    
-    HE_CODER = HTMLEntities.new
-    #
-    # Converstion maps for accented chars to their equivalents
-    # Starting from offset 128
-    #
-    EXTENDED_ASCII_MAP = [
-       67, 117, 101,  97,  97,  97,  97, 99, 
-      101, 101, 101, 105, 105, 105,  65, 65, 
-       69,   [ 97, 101 ],     [ 65, 69], 111, 
-      111, 111, 117, 117,  95,  79,  85, nil,
-      nil,  95, 102,  97, 105, 111, 117, 110, 
-      78 
-    ]
-    #
-    # Converstion maps for accented chars to their equivalents
-    # Starting from offset 222
-    #
-    EXTENDED_ASCII_MAP2 = [ nil, [115, 115] ]
-    
-    # agencies - please store the names in capital letters
-    AUTHOR_AGENCIES = ( File.open( File.join( File.dirname(__FILE__), 'clean/AGENCIES' ) ).read.split(/(\n|\r)+/m).collect{ |x| x.strip } rescue [] )
-    
-    # LOADING AUTHOR STOP WORDS
-    Dir[ File.join( File.dirname(__FILE__), 'clean/??.STOPWORDS' ) ].each do | file |
-      language = File.basename(file)[0, 2].downcase
-      AUTHOR_STOP_WORDS[language] = File.open(file).read.split(/(\n|\r)+/m).collect! do |word|
-        word = word.strip 
-        # check if the stopword is regular expression starting and ending with /
-        word[0] == 47 && word[-1] == 47 ? word[1..-2] : "(^|\\s+)#{word}(\\s+|$)"
+    unless defined?(AUTHOR_STOP_WORDS)
+      AUTHOR_STOP_WORDS = {}
+      AUTHOR_SEPARATOR_WORDS = [ 'and', 'und' ]
+      AUTHOR_SEPARATORS = /[,\/&\|]/
+        AUTHOR_PUNCTUATIONS = /[\.\:\-\+]/
+        ALL_PUNCTUATIONS = /[\@\!\"\#\$\%\&\^\'\(\)\{\}\[\]\;\:\<\>\.\,\|\?\/\\\+\=\_\-\*\~\`\´\`\‘\’\“\”\„\«\»\…\¿\¡\®\™\©]/
+        NAMED_PUNCTUATIONS = Regexp.new( "[#{HTMLEntities::MAPPINGS['xhtml1'].values.select{|x| x > 255 }.pack('U*')}]" )
+
+      HE_CODER = HTMLEntities.new
+      #
+      # Converstion maps for accented chars to their equivalents
+      # Starting from offset 128
+      #
+      EXTENDED_ASCII_MAP = [
+        67, 117, 101,  97,  97,  97,  97, 99, 
+        101, 101, 101, 105, 105, 105,  65, 65, 
+        69,   [ 97, 101 ],     [ 65, 69], 111, 
+        111, 111, 117, 117,  95,  79,  85, nil,
+        nil,  95, 102,  97, 105, 111, 117, 110, 
+        78 
+      ]
+      #
+      # Converstion maps for accented chars to their equivalents
+      # Starting from offset 222
+      #
+      EXTENDED_ASCII_MAP2 = [ nil, [115, 115] ]
+
+      # agencies - please store the names in capital letters
+      AUTHOR_AGENCIES = ( File.open( File.join( File.dirname(__FILE__), 'clean/AGENCIES' ) ).read.split(/(\n|\r)+/m).collect{ |x| x.strip } rescue [] )
+
+      # LOADING AUTHOR STOP WORDS
+      Dir[ File.join( File.dirname(__FILE__), 'clean/??.STOPWORDS' ) ].each do | file |
+        language = File.basename(file)[0, 2].downcase
+        AUTHOR_STOP_WORDS[language] = File.open(file).read.split(/(\n|\r)+/m).collect! do |word|
+          word = word.strip 
+          # check if the stopword is regular expression starting and ending with /
+          word[0] == 47 && word[-1] == 47 ? word[1..-2] : "(^|\\s+)#{word}(\\s+|$)"
+        end
       end
     end
-    
     
     class << self
       
