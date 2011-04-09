@@ -33,24 +33,24 @@ module JCore
     
     def self.up
       create_table :stories do |t|
-        t.string   :title, :limit => 255
+        t.column   :title, 'VARBINARY(750)', :null => false
         t.string   :author_names, :limit => 2000
-        t.string   :url, :limit => 2000
-        t.string   :source_name, :limit => 255
-        t.string   :feed_url, :limit => 2000
-        t.string   :language_code, :limit => 5
+        t.string   :url, :limit => 2000, :null => false
+        t.string   :source_name, :limit => 255, :null => false
+        t.string   :feed_url, :limit => 2000, :null => false
+        t.string   :language_code, :limit => 5, :null => false
         t.string   :image_url, :limit => 2000
         t.integer  :image_height
         t.integer  :image_width
         t.string   :image_type, :limit => 20
         t.boolean  :unread, :default => true, :null => :false
-        t.string   :title_checksum, :limit => 255
+        t.column   :title_checksum, 'VARBINARY(750)', :null => false
         t.string   :url_checksum, :limit => 40
         t.datetime :created_at
-        t.index    :title_checksum, :name => 'story_titles_idx'
-        t.index    [ :source_name, :url_checksum ], :name => 'story_urls_idx'
-        t.index    :unread, :name => 'unread_stories_idx'
       end
+      add_index :stories, :title_checksum, :name => 'story_titles_idx', :unique => true
+      add_index :stories, [ :source_name, :url_checksum ], :name => 'story_urls_idx', :unique => true
+      add_index :stories, :unread, :name => 'unread_stories_idx'
       create_table :blacklisted_authors do |t|
         t.string :keyword
         t.index :keyword, :unique => true
@@ -97,6 +97,7 @@ module JCore
     serialize :author_names, Array
     serialize :categories, Array
 
+    #before_create :clean_author_name, :clean_categories
     before_create :duplicate_title_check, :duplicate_url_check, :clean_author_name, :clean_categories
     
     self.send( $scope_method, :unread, { :conditions => { :unread => true } } )
@@ -148,21 +149,29 @@ module JCore
       self.image_width = image_hash['width']
       self.image_type = image_hash['content_type']
     end
+
+    def save
+      begin
+        return super
+      rescue Exception => msg
+      end
+      return false
+    end
     
     protected
     
     def duplicate_title_check
       self.title_checksum = self.title.mb_chars.downcase.gsub(/\s+/,'_').gsub(/\W+/,'').to_s
-      errors.add( 'title', :already_exists ) if JCore::Story.exists?( { :title_checksum => self.title_checksum } )
-      return errors.blank?
+      #errors.add( 'title', :already_exists ) if JCore::Story.exists?( { :title_checksum => self.title_checksum } )
+      #return errors.blank?
     end
     
     def duplicate_url_check
       self.url_checksum = Digest::MD5.hexdigest( self.url )
-      errors.add( 'url', :already_exists ) if JCore::Story.exists?( { 
-        :source_name => self.source_name, :url_checksum => self.url_checksum 
-      } )
-      return errors.blank?
+      #errors.add( 'url', :already_exists ) if JCore::Story.exists?( { 
+      #  :source_name => self.source_name, :url_checksum => self.url_checksum 
+      #} )
+      #return errors.blank?
     end
     
     def clean_author_name

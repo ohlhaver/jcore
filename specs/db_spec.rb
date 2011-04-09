@@ -85,7 +85,7 @@ describe JCore::Story do
     story.should_not be_new_record
     story = JCore::Story.create( @duplicate_title_attrs )
     story.save.should be_false
-    story.errors.on(:title)
+    #story.errors.on(:title)
   end
   
   it "should not store stories with duplicate url" do
@@ -93,7 +93,7 @@ describe JCore::Story do
     story.should_not be_new_record
     story = JCore::Story.create( @duplicate_url_attrs )
     story.save.should be_false
-    story.errors.on(:title)
+    # story.errors.on(:title)
   end
   
   it "should remove authors which matches the blacklist experession" do
